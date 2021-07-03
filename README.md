@@ -306,6 +306,7 @@
 		return memberDAO.join(vo);
 	}
 	```  
+	
  	 * memberMapper.xml: DB에 MemberVO 값을 저장합니다.(#{}='값'/ ${}=값, jdbcType=VARCHAR: 파라미터값이 null인걸 허용함)
    	```java
 	<!-- 회원가입 -->
@@ -338,11 +339,13 @@
 		}	
 	}
 	```
+	
   	* login.jsp: 자동로그인 사용할 때 토큰 값을 같이 전송해야하기 때문에 form 전송 주소 값에 토큰값을 추가해서 합니다.
   	```java
 	<form name="loginForm" method="post" action="/member/login-processing?${_csrf.parameterName}=${_csrf.token}" 
 			onsubmit="login(document.loginForm); return false;" >
 	```
+	
    	* security-context.xml
 	```java
 	<!-- 로그인:  로그인 인증, 성공, 실패 처리 작업-->
@@ -363,6 +366,7 @@
 		<security:remember-me remember-me-parameter="remember-me"  remember-me-cookie="remember-me" data-source-ref="dataSource" 
    			 authentication-success-handler-ref="userLoginSuccessHandler"  token-validity-seconds="604800" />
 	``` 
+	
   	 * UserLoginAuthProvider: 로그인 정보와 DB 정보를 비교합니다.
 	```java
 	@Override
@@ -393,6 +397,7 @@
 		return newAuth;
 	}
 	``` 
+	
 	* CustomUserDetailsService: DB에서 유저 정보를 가져옵니다.
 	```java
 	@Override
@@ -414,6 +419,7 @@
 		}	
 		return userVO;
 	```
+	
 	* UserLoginSuccessHandler: 로그인 성공시 이전 페이지로 이동합니다.
 	```java
 	@Override
@@ -440,6 +446,7 @@
 		}
 	}
 	```
+	
 	* UserLoginFailHandler: 로그인 실패시 실패 안내 문구와 함께 로그인 페이지로 이동합니다.
 	```java
 	@Override
@@ -455,6 +462,7 @@
 		request.getRequestDispatcher("/member/login").forward(request, response);		
 	}
 	```
+	
 	* UserDeniedHandler: 로그인 후 뒤로가기시 로그인 페이지가 아닌 메인페이지로 이동합니다.
 	```java
 	@Override
@@ -464,6 +472,7 @@
 		request.getRequestDispatcher("/").forward(request,response);				
 	}
 	```
+	
 	* UserDeniedHandler: 로그인 후 뒤로가기시 로그인 페이지가 아닌 메인페이지로 이동합니다.
 	```java
 	@Override
@@ -522,6 +531,7 @@
 		return "redirect:/member/callback_login";
 	}
 	```
+	
   	* NaverAuthBO: 네아로 인증 URL 생성, 인증토큰 가져오기, 사용자 정보 
   	```java
 	//네아로 인증 URL 생성
@@ -597,6 +607,7 @@
 		}			
 	}
 	```
+	
 	* MemberMapper.xml: 입력한 아이디와 이메일이 일치한 회원의 비밀번호를 임시 발급한 비밀번호(암호화 됨)로 변경합니다.
 	```java
 	<!-- 비밀번호 -> 임시 비밀번호로 변경 -->
@@ -607,42 +618,181 @@
 -----
 
 ### 공지
-* 사용자별 권한  
+* **사용자별 권한**  
    |사용자|글 읽기|글 쓰기|글 수정|글 삭제|
    |:----:|:----:|:-----:|:-----:|:-----:|
    |비회원|O|X|X|X|
    |회원|O|X|X|X|
    |관리자|O|O|O|O|
 
- * 글쓰기
-> 전체공지: 전체 공지 체크 후 글 작성 완료하면 공지 및 커뮤니티 페이지 전체에 공지가 등록됩니다.  
-> 공지글: 공지 게시판의 공지글로 등록됩니다.
+ * **글쓰기**
+> **전체공지:** 전체 공지 체크 후 글 작성 완료하면 공지 및 커뮤니티 페이지 전체에 공지가 등록됩니다.  
+> **공지글:** 공지 게시판의 공지글로 등록됩니다.
   * **화면구현**
   * **기능구현**
-   	* 
+   	* BrdController: 접속한 유저의 아이디와 닉네임을 가져와 작성된 글을 등록합니다. 전체공지 또는 공지글 체크 안할시 'N'값을 넣어 일반 글 표시를 합니다. 
 	```java
-	
+	//글쓰기 등록
+	@RequestMapping(value="/register",method=RequestMethod.POST)
+	public String insertPOST(@ModelAttribute("vo")BrdVO vo, Model model) throws Exception{
+		String str="redirect:/cmu/brd";
+		try {
+			//유저 ID,닉네임
+			UserDetailsVO principal = (UserDetailsVO) SecurityContextHolder
+					.getContext().getAuthentication().getPrincipal();
+			vo.setMemId(principal.getUserId());
+			vo.setMemNickName(principal.getUserNickName());
+			//공지글 체크 없을시
+			if(vo.getNotice()==null) {vo.setNotice("N");}			
+			service.regist(vo);	//등록
+			model.addAttribute("mid",vo.getBrdId());
+			if(vo.getNav().equals(10000)) {
+				str= "redirect:/notice";
+			}
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return str;
+	}
 	```
-
+	
+	* boardMapper.xml: DB 공지테이블에 정보를 등록합니다. 공지 페이지는 답글기능이 없어 group(게시물번호)값을 넣지 않습니다.(selectkey에 대한 설명은 아래 글쓰기에 설명)
+	```java
+	<!-- register : 글쓰기 (공지,커뮤니티)-->
+	<insert id="createPage1" parameterType="BrdVO">
+	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
+			select board_post_${nav}_seq.currval as postId from dual
+		</selectKey>
+	 	insert into board_post_${nav} 
+		(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_notice)
+		values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+		#{title},#{content},#{memId},#{memNickName},#{notice})
+	</insert>
+	```
+	
 ### 커뮤니티
-* 사용자별 권한  
+* **사용자별 권한**  
 	|사용자|글 읽기|글 쓰기|공지글 쓰기|글 수정|글 삭제|
 	|:----:|:----:|:----:|:----:|:----:|:----:|
 	|비회원|O|X|X|X|X|
 	|회원|O|O|x|O|O|
 	|관리자|O|O|O|O|O|
-
-1. 전체
-   * 각 게시물의 게시판명 표시합니다.
-   * 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개)
+* **화면구현**
+* **기능구현**
+ 	* BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
+	```java
+	@RequestMapping(value = "/brdnormal", method=RequestMethod.GET)
+	public void tabCla(@ModelAttribute("nav")String nav,@ModelAttribute("cla")String cla,
+			String mid,String post,SearchCriteria cri, Model model) throws Exception {
+		logger.info("커뮤니티 게시판 리스트");
+		try {
+			//선택한 홈피 메뉴 이름 ,링크(커뮤니티 등)
+			model.addAttribute("tabMenu",service.tabMenuName(nav));
+			//선택한 홈피 메뉴에 게시판 메뉴(전체,일상,뷰티 등)
+			model.addAttribute("brdMenuList",service.brdMenuList(nav));
+			model.addAttribute("brdNameList",service.brdNameList(nav));	
+			//게시판 이름
+			model.addAttribute("brdMenuName",service.brdMenuName(cla));
+			//전체 공지사항  리스트 출력
+			model.addAttribute("noticeT",service.noticeList(nav));
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("nav", nav);	
+			map.put("cla", cla);	
+			map.put("searchType", cri.getSearchType());
+			map.put("cri", cri);
+			
+			//페이지데이터
+			PageMaker pageMk=new PageMaker();
+			pageMk.setCri(cri);			
+			pageMk.setTotalCount(service.listPageCnt(map));
+			model.addAttribute("pageMk", pageMk);
+			
+			//게시판 리스트 출력
+			model.addAttribute("list",service.listPageCri(map));
+			model.addAttribute("cri",cri);
+			model.addAttribute("searchType",cri.getSearchType());
+			//게시물 내용
+			if(mid!=null && post!=null) {
+				logger.info("게시물 보기 페이지");
+				Map<String,Object> PageMap =new HashMap<String,Object>();
+				PageMap.put("nav",nav);
+				PageMap.put("cla",cla);
+				PageMap.put("mid",mid);
+				PageMap.put("postId",post);
+				model.addAttribute(service.read(PageMap,1));
+			}
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	```
+**1. 전체/ 인기글** 
+> 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개) 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
+  * boardMapper.xml
+   	* board_regtime column: DECODE 함수를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 시간으로 표시, 아니면 'YYYY.MM.DD' 날짜로 표시됩니다.
+   				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)
+	* fileY column: 각 리스트의 파일 수를 가져와 0 초과면 파일첨부 아이콘이 표시됩니다.
+	```java
+	<!-- 공지사항 : 전체공지 -->
+	<select id="noticeListT" resultType="BrdVO" resultMap="boardMap">
+		<![CDATA[select b.*,(select count(*) from board_attach_10000 ba where ba.post_idx(+)=b.post_idx)as fileY 
+		from board_post_10000 b where post_notice='T' and rownum<=5 order by post_idx desc]]>
+	</select>
+	<!-- 게시판 : total-->
+	<select id="listSearchTotal" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+		 <![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname, 
+			b.post_notice, b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
+			DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
+	        ,TO_CHAR(b.post_regtime,'YY.MM.DD')) board_regtime, 
+	        (select count(*) from board_attach_20000 ba where ba.post_idx=b.post_idx)as fileY 	        
+			from(
+				select a.* from(
+					select  ROWNUM rn, p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+						select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+						from board_post_${nav} bp where post_notice='N' 
+					order by post_group DESC, post_step ASC,post_indent ASC) p where 1=1]]>
+			<include refid="search" />
+	        <![CDATA[ order by rn ASC) a 
+	        	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0) b , board_list c
+	        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
+     </select>
+	```
  
-2. 인기글
-   *  조회수 50 이상 또는 댓글 50개 이상인 글만 인기글 리스트에 표시됩니다.
-
-3. 게시판/ 카테고리
-   * 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다.
-   * 각 게시판, 카테고리 공지글을 작성할 수 있습니다.
-
+**2. 인기글**
+> 조회수 50 이상 또는 댓글 50개 이상인 글만 인기글 리스트에 표시됩니다.
+  * boardMapper.xml: 'post_hit>=50 or reply_cnt>=50' 조건으로 인기글 목록을 출력합니다.
+	```java
+	<!-- 게시판 : hot -->
+	<select id="listSearchHot" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
+        b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
+		DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
+        ,TO_CHAR(b.post_regtime,'YY.MM.DD')) board_regtime,
+        (select count(*) from board_attach_20000 ba where ba.post_idx=b.post_idx)as fileY 
+		from(
+			select a.* from(
+				select  ROWNUM rn, p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+				from board_post_${nav} bp where post_notice='N'
+			order by post_group DESC, post_step ASC,post_indent ASC) p where 1=1]]>
+		<include refid="search" />
+        <![CDATA[ order by rn ASC) a
+       	 	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0 and post_hit>=50 or reply_cnt>=50) b , board_list c
+       	 where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
+	</select>	
+	```
+**3. 게시판/ 카테고리**
+> 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다.
+  *  boardMapper.xml
+	```java
+	<!-- 게시판별 공지 -->
+	<select id="noticeListB" resultType="BrdVO" resultMap="boardMap">
+		<![CDATA[select bp.*,bc.cate_name,(select count(*) from board_attach_20000 ba where ba.post_idx(+)=bp.post_idx)as fileY 
+		from ( select *from board_post_${nav} where post_notice='Y' and brd_idx=#{mid} )bp, brd_category bc 
+		where bp.cate_idx=bc.cate_idx(+) and rownum<=5 order by post_idx desc ]]>
+	</select>
+	```
 ### 글쓰기
 1.공지글 체크
    * 관리자 권한만 사용 가능하며 '전체','인기글' 메뉴을 제외한 모든 게시판에서 사용 가능합니다.
