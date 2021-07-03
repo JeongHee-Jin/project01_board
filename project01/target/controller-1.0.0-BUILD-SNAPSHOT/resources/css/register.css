@@ -1,0 +1,189 @@
+	
+#write_container {
+	text-align: center;
+	padding: 100px 10px;
+	max-width:900px;
+	height:auto;
+	margin: auto;
+}
+.rigform{
+	padding: 0 10%;
+}
+#editer_board{
+	width: 100%;
+	padding:20px 15px;
+	border:1px solid #e5e5e5;	
+}
+#common_editer{
+	text-align:left;
+	position:relative;
+	margin: 0 10%;
+}
+
+.heightMg{
+	margin-bottom:9px;
+}
+#write_container .boardTit{
+	text-align: left;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #353535;
+}
+#check_div{
+	height: 40px;
+    line-height: 30px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+#check_div ._check{
+	display: inline-block;
+	padding: 10px 10px 10px 0;
+}
+#common_editer .selIdDiv, .item+input{
+	display:inline;
+}
+#common_editer .selIdDiv .menuId{
+	border: 1px solid #ebecef;
+    background: #fff;
+	width: 150px;
+    height: 30px;
+}
+#common_editer .item+input[type="text"]{
+	border: 1px solid #ebecef;
+    background: #fff;
+    width: 100%;
+    height: 30px;
+}
+#common_editer #myEditor{
+	width: 470px;
+    height: 350px;
+}
+/* @media(max-width:900px){
+	#write_container{
+		width: auto;
+	}	
+}
+@media(max-width:650px){
+	#write_container{
+		width: auto;
+		margin: 0 10px;
+	}
+} */
+.myEditorPlugin span>select{
+	float: left;
+	margin-right:10px;
+}
+.myEditorPlugin .make01, .make02, .make03{
+	margin-right:10px;
+	font-size:0;
+}
+
+.myEditorPlugin span>img{
+	vertical-align:top;
+	display:inline;
+}
+
+#write_container .btn_post{
+    margin-top: 10px;
+    line-height: 50px;
+}
+#write_container .register_btn{
+	width: 70px;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    height: 40px;
+}
+#content_iframe{
+	border:1px solid #e5e5e5;
+	width: 100%;
+    height: 400px;
+    display: block;
+}
+#li_txt{
+	margin-bottom:15px;
+}
+.btn_file{
+	margin-left: 20px;
+	color: #009f47;
+    border: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 20px;
+}
+.editor_btn{
+	border:0;
+	width: 21px;
+    height: 21px;
+    background: url("/resources/img/sub_register/btn_set.png") no-repeat 0 0;
+    vertical-align: top;
+}
+.make01 .editor_btn.bold{
+	width: 22px;
+    background-position: -43px 0;
+}
+.make01 .editor_btn.italic{
+    background-position: -86px 0;
+}
+.make01 .editor_btn.underline{
+    background-position: -65px 0;
+}
+.make01 .editor_btn.StrikeThrough{
+    background-position: -107px 0;
+}
+.filebox input[type="file"],.btn_html{ 
+	/* 파일 필드 숨기기 */ 
+	width:44px;
+	opacity: 0;
+	padding: 0; 
+	margin: -1px; 
+	clip:rect(0,0,0,0); 
+	border: 0; 
+}
+
+.make03 .editor_btn.atFile{
+	display: inline-block;
+	width: 41px;
+    background-position: -466px 0;
+}
+.make03 .editor_btn.URL{
+	display: inline-block;
+    position: relative;
+	width: 27px;
+    background-position: -506px 0;
+}
+.make03 .editor_btn.html_span{
+	display: inline-block;
+    float: right;
+    width: 44px;
+    height: 23px;
+    margin: -1px 0;
+    background: url("/resources/img/sub_register/btn_html.png") no-repeat 0 0;
+}
+.uploadResult{
+	position: relative;
+}
+.uploadResult .attach-tit{
+	margin: 10px;
+}
+.uploadResult .attach-list{
+	display: inline-block;
+	width: 100%;
+    border: 1px solid #ebecef;
+	padding: 10px;	
+	min-height:50px;
+}
+ul .fileLi{
+	padding: 2px;
+}
+
+
+
+
+
+
+
+
+
+
+
+

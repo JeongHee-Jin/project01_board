@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.project01.mappers.AdminMapper">
+	<select id="userTotal" resultType="int">
+		select count(mem_id) from member_info where 1=1 
+		<include refid="search" />
+	</select>
+	<!-- 유저 전체 리스트 -->
+	<select id="userList" resultType="hashmap" parameterType="hashmap">
+		<![CDATA[select b.* from( 
+		select ROWNUM rn, mem_id,mem_nickname,to_char(mem_regdate,'yy.mm.dd') mem_regdate,mem_role, 
+            	(select count(*) from board_post_20000 bp where a.mem_id=bp.mem_id)+
+            	(select count(*) from board_post_10000 bp where a.mem_id=bp.mem_id) board_sum, 
+            	(select count(*) from reply_20000 bp where a.mem_id=bp.mem_id) reply_sum 
+           	from member_info a 
+        	where rownum <= #{cri.page} * #{cri.pageLen}]]>
+        	<include refid="search" />
+        	<![CDATA[order by mem_regdate) b 
+        where rn > (#{cri.page} -1) * #{cri.pageLen}  order by rn]]>
+	</select>
+	<sql id="search">
+		<if test="cri.searchType != null">		
+			<if test="cri.searchType == '0'.toString()"> and mem_id like '%'||#{cri.keyword}||'%' </if>
+			<if test="cri.searchType == '1'.toString()"> and mem_nickname like '%'||#{cri.keyword}||'%' </if>
+		</if>
+	</sql>
+	<update id="chkUserRoleModify" parameterType="java.util.List">
+		update member_info set mem_role=#{role}
+		<where>
+			mem_id in
+			<foreach collection="userIdArr" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</where>
+	</update>
+	<select id="brdMenuList" resultType="hashmap" parameterType="hashmap">
+		select brd_menu_idx,brd_menu_name,menu_idx from board_menu where brd_menu_idx not in(1100,1200) order by brd_menu_order
+	</select>
+	<select id="brdList"  resultType="hashmap" parameterType="hashmap">
+		select brd_idx,brd_name from board_list where brd_menu_idx=#{menuIdx} order by brd_order
+	</select>
+	<select id="cateList"  resultType="hashmap" parameterType="hashmap">
+		select cate_idx,cate_name from brd_category where brd_idx=#{brdIdx} order by cate_order
+	</select>
+	
+	<!-- 새로 생성한 게시판에 첫 게시판 생성시 : 개수 -->
+	<select id="boardNum" resultType="int">
+		select count(*) from board_list where brd_menu_idx=${brdMenuIdx}
+	</select>
+	<!-- 새로 생성한 게시판에 첫 게시판 생성시 : 우선순위=1-->
+	<insert id="firBoardName" parameterType="hashmap">
+		insert into board_list values(board_list_seq.nextval,#{brdName},1,${brdMenuIdx})
+	</insert>
+	<!-- 첫 게시판에 첫 카테고리 생성시 : 개수-->
+	<select id="cateNum" resultType="int">
+		select count(*) from brd_category where brd_idx=${brdIdx}
+	</select>
+	<!-- 첫 게시판에 첫 카테고리 생성시 : 우선순위=1-->
+	<insert id="firCateName" parameterType="hashmap">
+		insert into brd_category values(brd_category_seq.nextval,#{cateName},1,${brdIdx})
+	</insert>
+	
+	<!-- 게시판메뉴/ 게시판/ 카테고리 추가 -->
+	<insert id="addMenuName" parameterType="hashmap">
+		insert into board_menu values(board_menu_seq.nextval,#{addMenuName},
+		(select max(brd_menu_order)+1 from board_menu where  menu_idx=${tabId}),${tabId},#{addMenuLink})
+	</insert>
+	<insert id="addBoardName" parameterType="hashmap">
+		insert into board_list values(board_list_seq.nextval,#{brdName},
+		(select max(brd_order)+1  from board_list where brd_menu_idx=${brdMenuIdx}),${brdMenuIdx})
+	</insert>
+	<insert id="addCateName" parameterType="hashmap">
+		insert into brd_category values(brd_category_seq.nextval,#{cateName},
+		(select max(cate_order)+1 from brd_category where brd_idx=${brdIdx}),${brdIdx})
+	</insert>
+	
+	<!-- 게시판 메뉴 수정/삭제 -->
+	<update id="brdMenuModify" parameterType="hashmap">
+		update board_menu set brd_menu_name=#{brdMenuValue} where brd_menu_idx=${brdMenuId}
+	</update>
+	<delete id="brdMenuDelete">
+		delete from board_menu where brd_menu_idx=${brdMenuId}
+	</delete>
+	<!-- 게시판 수정/삭제 -->
+	<update id="brdModify" parameterType="hashmap">
+		update board_list set brd_name=#{brdValue} where brd_idx=${brdId}
+	</update>
+	<delete id="brdDelete">
+		delete from board_list where brd_idx=${brdId}
+	</delete>
+	<!-- 카테고리 수정/삭제 -->
+	<update id="cateModify" parameterType="hashmap">
+		update brd_category set cate_name=#{cateValue} where cate_idx=${cateId}
+	</update>
+	<delete id="cateDelete">
+		delete from brd_category where cate_idx=${cateId}
+	</delete>
+	<!-- 회원삭제 -->
+	<delete id="deleteMem">
+		delete from member_info where mem_id=#{value}
+	</delete>
+</mapper>

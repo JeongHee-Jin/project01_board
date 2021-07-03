@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ${value} : 데이터를 그대로 옮겨줌
+#{value} : 데이터에 ""가 추가됨-->
+<!-- mapper가 DAO 역할을 대신 해준다 -->
+<mapper namespace="org.project01.mappers.BoardMapper">
+	<resultMap id="tabMenuNameMap" type="string">
+		<result property="menuName" column="menu_name" />
+		<result property="menuLink" column="menu_link" />
+	</resultMap>
+	<resultMap id="boardMap" type="BrdVO">
+		<result property="postId" column="post_idx" />
+		<result property="brdId" column="brd_idx" />
+		<result property="brdName" column="brd_name" />
+		<result property="cateId" column="cate_idx" />
+		<result property="cateName" column="cate_name" />
+		<result property="title" column="post_title" />
+		<result property="content" column="post_content" />
+		<result property="memId" column="mem_id" />
+		<result property="memNickName" column="mem_nickname" />
+		<result property="notice" column="post_notice" />
+		<result property="regtime" column="post_regtime" />
+		<result property="regtimeB" column="board_regtime" />
+		<result property="hit" column="post_hit" />
+		<result property="group" column="post_group" />
+		<result property="step" column="post_step" />
+		<result property="indent" column="post_indent" />
+		<result property="replyCnt" column="reply_cnt" />
+		<result property="brdMenuId" column="brd_menu_idx" />
+		<result property="prev" column="prev" />
+		<result property="next" column="next" />
+	</resultMap>
+	<!-- #{} :?/'값' ${} : 값 -->
+	<!-- 홈페이지 메뉴 이름 -->
+	<select id="tabMenuName" resultType="String">
+		select menu_name,menu_link from tab_menu where menu_idx=${value}
+	</select>
+	
+	<!-- listPage : 총 게시물 수 -->
+	<select id="countPaging" resultType="int" >
+		<![CDATA[ select count(post_idx) from board_post_${value} where post_idx > 0 ]]>
+	</select>
+	
+	<!-- 공지 게시판 : notice-->
+	<select id="listSearchNotice" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select b.*,d.cate_name from(
+		select a.* from(
+		select  ROWNUM rn, p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+		select bp.* from board_post_${nav} bp ) p where brd_idx=${mid}]]>
+		<include refid="search" />
+        <![CDATA[ order by rn ) a
+        where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0) b ,brd_category d
+        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx(+) order by rn DESC]]>
+	</select>
+	<!-- 공지 게시판 카테고리 : notice-->
+	<select id="listSearchNotice2" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select b.*,d.cate_name from(
+		select a.* from(
+		select rownum rn,p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+		select bp.* from board_post_${nav} bp ) p where cate_idx=${sub}]]>
+		<include refid="search" />
+		<![CDATA[order by rn ASC ) a
+        where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0  ) b ,brd_category d 
+        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx]]>
+	</select>
+		
+	<!-- 게시판 : total-->
+	<select id="listSearchTotal" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,
+		b.post_notice, b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
+		CASE when b.post_regtime> TO_CHAR(sysdate,'YYYY.MM.DD') THEN TO_CHAR(b.post_regtime,'HH24:MI')
+        ELSE TO_CHAR(b.post_regtime,'YY.MM.DD') END board_regtime 
+		from(
+			select a.* from(
+				select  ROWNUM rn, p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+					from board_post_${nav} bp where post_notice='N'
+				order by post_group DESC, post_step ASC,post_indent ASC) p where 1=1]]>
+		<include refid="search" />
+        <![CDATA[ order by rn ASC) a
+        	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0) b , board_list c
+        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
+	</select>
+	<!-- 게시판 : hot --><!-- resultType은 select구문에서만 존재 -->
+	<select id="listSearchHot" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
+        b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
+		CASE when b.post_regtime> TO_CHAR(sysdate,'YYYY.MM.DD') THEN TO_CHAR(b.post_regtime,'HH24:MI')
+        ELSE TO_CHAR(b.post_regtime,'YY.MM.DD') END board_regtime 
+		from(
+			select a.* from(
+				select  ROWNUM rn, p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+				from board_post_${nav} bp where post_notice='N'
+			order by post_group DESC, post_step ASC,post_indent ASC) p where 1=1]]>
+		<include refid="search" />
+        <![CDATA[ order by rn ASC) a
+       	 	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0 and post_hit>50) b , board_list c
+       	 where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
+	</select>
+	<!-- 게시판2 : 게시판 클릭-->
+	<select id="listSearch2" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
+        b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,d.cate_name, 
+		CASE when b.post_regtime> TO_CHAR(sysdate,'YYYY.MM.DD') THEN TO_CHAR(b.post_regtime,'HH24:MI')
+        ELSE TO_CHAR(b.post_regtime,'YY.MM.DD') END board_regtime 
+		from(
+			select a.* from(
+				select rownum rn,p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+				from board_post_${nav} bp where post_notice='N' order by post_group DESC, post_step ASC,post_indent ASC) p 
+			where brd_idx=${mid}]]>
+		<include refid="search" />
+		<![CDATA[order by rn ASC ) a
+       		 where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0  ) b,brd_category d 
+       	 where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx(+) order by rn]]>
+	</select>
+	
+	<!-- 게시판3 : 게시판 말머리 클릭 -->
+	<select id="listSearch3" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select  b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
+        b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,d.cate_name, 
+		CASE when b.post_regtime> TO_CHAR(sysdate,'YYYY.MM.DD') THEN TO_CHAR(b.post_regtime,'HH24:MI')
+        ELSE TO_CHAR(b.post_regtime,'YY.MM.DD') END board_regtime 
+		from(
+			select ROW_NUMBER() OVER(ORDER BY rn desc) as pno, a.* from(
+				select rownum rn,p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt from board_post_${nav} bp 
+				where post_notice='N' order by post_group DESC, post_step ASC,post_indent ASC) p where cate_idx=${sub}]]>
+		<include refid="search" />
+		<![CDATA[order by rn ASC ) a
+        	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0  ) b ,brd_category d 
+        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx order by pno desc]]>
+	</select>
+
+	<!-- total 게시판 게시물수 -->
+	<select id="listSearchCntTotal" resultType="int" >
+		select count(post_idx) from board_post_${nav} where 1=1
+		<include refid="search" />
+		and post_idx > 0
+	</select>
+	<!-- hot 게시판 게시물수 -->
+	<select id="listSearchCntHot" resultType="int" >
+		select count(post_idx) from board_post_${nav} where 1=1
+		<include refid="search" />
+		and post_idx > 0 and post_hit>50
+	</select>
+	<!-- 게시판(ex:공부) 총게시물수 -->
+	<select id="listSearchCnt2" resultType="int" >
+		select count(post_idx) from board_post_${nav} where brd_idx=${mid}
+		<include refid="search" />
+		and post_idx > 0
+	</select>
+	
+	<!-- 카테고리(ex:어학) 총게시물수 -->
+	<select id="listSearchCnt3" resultType="int" >
+		select count(post_idx) from board_post_${nav} where cate_idx=${sub}
+		<include refid="search" />
+		and post_idx > 0
+	</select>
+	
+	<!-- 검색 타입으로 추가 -->
+	<sql id="search">
+		<if test="cri.searchType != null">
+			<if test="cri.searchType == 'bcaN'.toString()"> and bca_id like '%'||#{cri.keyword}||'%' </if>
+			<!-- 제목+내용 -->
+			<if test="cri.searchType == 'tc'.toString()"> and (post_title like '%'||#{cri.keyword}||'%' 
+				or post_content like '%'||#{cri.keyword}||'%')</if>
+			<!-- 제목 -->
+			<if test="cri.searchType == 't'.toString()"> and post_title like '%'||#{cri.keyword}||'%' </if>
+			<!-- 글작성자 -->
+			<if test="cri.searchType == 'w'.toString()"> and mem_writer like '%'||#{cri.keyword}||'%' </if>
+			<!-- 댓글내용 -->
+			<if test="cri.searchType == 'rc'.toString()"> and reply_content like '%'||#{cri.keyword}||'%'</if>
+			<!-- 댓글작성자 -->
+			<if test="cri.searchType == 'rw'.toString()"> and mem_writer like '%'||#{cri.keyword}||'%' </if>
+		</if>
+	</sql>
+	
+	<!-- 게시판메뉴이름,링크명 -->
+	<select id="brdMenuName" resultType="hashMap" >
+		select brd_menu_name,brd_menu_link from board_menu where brd_menu_idx=${value}
+	</select>
+	
+	<!-- 게시판이름 -->
+	<select id="brdName" resultType="hashMap" >
+		select bm.brd_menu_name,bl.brd_name from board_list bl,board_menu bm 
+		where brd_idx=${value} and bl.brd_menu_idx=bm.brd_menu_idx
+	</select>
+	
+	<!-- 공지사항 : 전체공지 -->
+	<select id="noticeListT" resultType="BrdVO" resultMap="boardMap">
+		<![CDATA[select * from board_post_10000 where post_notice='T' and rownum<=5 order by post_idx desc]]>
+	</select>
+	<!-- 게시판별 공지 -->
+	<select id="noticeListB" resultType="BrdVO" resultMap="boardMap">
+		<![CDATA[select bp.*,bc.cate_name
+		from ( select *from board_post_${nav} where post_notice='Y' and brd_idx=#{mid} )bp, brd_category bc 
+		where bp.cate_idx=bc.cate_idx(+) and rownum<=5 order by post_idx desc ]]>
+	</select>
+		
+	<!-- register : 글쓰기 (공지,커뮤니티)-->
+	<insert id="createPage1" parameterType="BrdVO">
+	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
+			select board_post_${nav}_seq.currval as postId from dual
+		</selectKey>
+	 	insert into board_post_${nav} 
+		(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_notice)
+		values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+		#{title},#{content},#{memId},#{memNickName},#{notice})
+	</insert>
+	<insert id="createPage2" parameterType="BrdVO">
+	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
+			select board_post_${nav}_seq.currval as postId from dual
+		</selectKey>
+	 	insert into board_post_${nav} 
+		(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_notice,post_group)
+		values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+		#{title},#{content},#{memId},#{memNickName},#{notice},board_post_${nav}_seq.currval)
+	</insert>
+
+	<select id="boardCnt1" resultType="int">
+		select count(post_idx) from board_post_${nav}
+	</select>
+	<select id="boardCnt2" resultType="int">
+		select count(post_idx) from board_post_${nav} where brd_idx=${mid}
+	</select>
+	<!-- readPage : 게시글 보기 :게시물이 1개일때-->
+	<select id="readPage" resultMap="boardMap" resultType="BrdVO">
+		select bp.*,bl.brd_menu_idx from  board_post_${nav} bp,board_list bl where post_idx=#{postId} and bl.brd_idx=#{mid}
+		<!-- select * from  board_post_${nav} where post_idx=#{postId} -->
+	</select>
+	<!-- 공지사항 글보기 -->
+	<select id="readPageNotice" resultMap="boardMap" resultType="BrdVO">
+	<![CDATA[
+		select bp.* ,prev,next from  board_post_${nav} bp,
+		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} ORDER BY post_idx ASC ) a full outer join 
+		(SELECT post_idx next FROM board_post_${nav} WHERE post_idx < #{postId} ORDER BY post_idx desc) b 
+	 	on a.prev != b.next where post_idx=#{postId} and rownum = 1 ]]>
+	</select>
+	<!-- 공지사항 카테고리 글보기 -->
+	<select id="readPageNoticeSub" resultMap="boardMap" resultType="BrdVO">
+	<![CDATA[
+		select bp.* ,prev,next from  board_post_${nav} bp,
+		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} ORDER BY post_idx ASC ) a 
+		full outer join 
+		(SELECT post_idx next FROM board_post_${nav} WHERE post_idx < #{postId} ORDER BY post_idx desc) b 
+	 	on a.prev != b.next where post_idx=#{postId} and bp.cate_idx=#{sub} and rownum = 1 ]]>
+	</select>
+	<!-- 게시글 보기 : total-->
+	<select id="readPageTotal" resultMap="boardMap" resultType="BrdVO">
+	<![CDATA[
+		select bp.* ,prev,next from  board_post_${nav} bp,
+		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} ORDER BY post_idx ASC ) a 
+		full outer join 
+		(SELECT post_idx next FROM board_post_${nav} WHERE post_idx < #{postId} ORDER BY post_idx desc) b 
+	 	on a.prev != b.next where post_idx=#{postId} and rownum = 1 ]]>
+	</select>
+	<!-- 게시글 보기 : Hot-->
+	<select id="readPageHot" resultMap="boardMap" resultType="BrdVO">
+	<![CDATA[
+		select bp.* ,prev,next from  board_post_${nav} bp,
+		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} and post_idx > 0 and post_hit>50 ORDER BY post_idx ASC) a 
+		full outer join 
+		(SELECT post_idx next FROM board_post_${nav} WHERE post_idx < #{postId} and post_idx > 0 and post_hit>50 ORDER BY post_idx desc) b 
+	 	on a.prev != b.next where post_idx=#{postId} and rownum = 1 ]]>
+	</select>
+	<!-- 게시글 보기 : 게시판글-->
+	<select id="readPageMid" resultMap="boardMap" resultType="BrdVO">
+	<![CDATA[
+		select bp.* ,prev,next from  board_post_${nav} bp,
+		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} and brd_idx=#{mid} ORDER BY post_idx ASC ) a 
+		full outer join 
+		(SELECT post_idx next FROM board_post_${nav} WHERE post_idx < #{postId} and brd_idx=#{mid} ORDER BY post_idx desc) b 
+	 	on a.prev != b.next where post_idx=#{postId} and bp.brd_idx=#{mid} and rownum = 1 ]]>
+	</select>
+	<!-- 게시글 보기 : 말머리글-->
+	<select id="readPageSub" resultMap="boardMap" resultType="BrdVO">
+	<![CDATA[
+		select bp.* ,prev,next from  board_post_${nav} bp,
+		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} and cate_idx=#{sub} ORDER BY post_idx ASC ) a 
+		full outer join 
+		(SELECT post_idx next FROM board_post_${nav} WHERE post_idx < #{postId} and cate_idx=#{sub} ORDER BY post_idx desc) b 
+	 	on a.prev != b.next where post_idx=#{postId} and bp.cate_idx=#{sub} and rownum = 1 ]]>
+	</select>
+	
+	<!-- 게시판 분류 list 출력 -->
+	<select id="brdMenuList" resultType="hashmap">
+		select brd_menu_idx, brd_menu_name,brd_menu_link from board_menu where menu_idx=${value} order by brd_menu_order
+	</select>
+	<!-- 게시판 list 출력 -->
+	<select id="brdNameList" resultType="hashmap">
+		select brd_idx,brd_name,brd_menu_idx,
+			(select brd_menu_link from board_menu bm where bm.brd_menu_idx=bl.brd_menu_idx) brd_menu_link 
+		from board_list bl where menu_idx=${value}
+	</select>
+	<!-- 게시판 말머리 list 출력 -->
+<!-- 	<select id="cateNameList" resultType="hashmap">
+		select bca_id,bca_name from board_category where brd_key=${value} order by bca_id
+	</select> -->
+	<select id="brdMenuListCla" resultType="hashmap">
+		select brd_idx,brd_name,bl.brd_menu_idx from board_list bl
+		where bl.brd_menu_idx=(select brd_menu_idx from board_list where brd_idx=${value})
+	</select>
+	<select id="cateNameListMid" resultType="hashmap">
+		select cate_idx,cate_name,cate_order from brd_category where brd_idx=${value} order by cate_order
+	</select>
+	
+	<!-- readPage : 조회수 증가(수정) --> <!-- resultMap : update, delete 에는 사용 안함  -->
+	<update id="hitUpdate" parameterType="BrdVO">
+		<![CDATA[update board_post_${nav} set post_hit =post_hit+1 where post_idx=#{postId}]]>
+	</update>
+	
+	<!-- modifyPage : 게시글 수정 -->
+	<update id="updatePage" parameterType="BrdVO">
+		update board_post_${nav} set cate_idx=#{cateId,jdbcType=VARCHAR}, post_title=#{title}, post_content=#{content},post_notice=#{notice} 
+		where post_idx=#{postId}
+	</update>
+
+	
+	<!-- remove : 게시글 삭제 -->
+	<delete id="deletePage" >
+		delete board_post_${nav} where post_idx=#{postId}
+	</delete>
+	
+	<!-- 게시글 답글 등록 -->
+	<insert id="commentaire" parameterType="BrdVO">
+		<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
+			select board_post_${nav}_seq.currval as postId from dual
+		</selectKey>
+	<![CDATA[insert into board_post_${nav}
+	(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_group,post_step,post_indent)
+	values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+	#{title},#{content},#{memId},#{memNickName},#{group},(select max(post_step)+1 from board_post_${nav} where post_group=#{group}),#{indent}+1)]]>
+	</insert>
+		
+	<insert id="commentaire2" parameterType="BrdVO">
+		<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
+			select board_post_${nav}_seq.currval as postId from dual
+		</selectKey>
+	<![CDATA[insert into board_post_${nav}
+	(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_group,post_step,post_indent)
+	values(board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+	#{title},#{content},#{memId},#{memNickName},#{group},#{step},(select max(post_indent)+1 from board_post_${nav} where post_step=#{step}))]]>
+	</insert>
+	
+	<update id="updateCommentaire" parameterType="map">
+		<![CDATA[update board_post_${nav} set post_step=(post_step+1) where post_group=#{group} and post_step>#{step}]]>
+	</update>
+	
+	<!-- 댓글수 수정 -->
+	<update id="updateReplyCnt" parameterType="map" >
+		update board_post_${nav} set reply_cnt=reply_cnt+#{num} where post_idx=#{postId}
+	</update>
+	
+	<!-- 게시판 메뉴 불러오기 -->
+	<select id="board_category" >
+		select bca_id,bca_name from board_category where brd_key=#{value} order by bca_id
+	</select>
+	<!-- 내가 쓴 게시물 -->
+	<select id="myBoard" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[select b.* from(
+			select rownum rn,p.*,bbl.brd_name from( select post_idx,brd_idx,post_title,post_regtime,
+				(select brd_menu_link from board_menu bm 
+				where (select bl.brd_menu_idx from board_list bl where bl.brd_idx=bp.brd_idx)=bm.brd_menu_idx) brd_menu_link 
+				from board_post_20000 bp where mem_id=#{userId} order by post_regtime desc) p  , board_list bbl 
+	        where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0  and bbl.brd_idx=p.brd_idx) b
+        	where rn > (#{cri.page} -1) * #{cri.pageLen} order by rn]]>
+	</select>
+	<!-- 내가 쓴 게시물 수 -->
+	<select id="myBoardCnt" resultType="int">
+		select count(post_idx) from board_post_20000 where mem_id=#{userId} and post_idx > 0
+	</select>
+	<!-- 선택한 게시물 삭제 -->
+	<delete id="myBoardDel" parameterType="java.util.List">
+		delete from board_post_20000 
+		<where>
+			post_idx in 
+			<foreach collection="list" item="item" open="(" close=")" separator=",">
+				 #{item}
+			</foreach>
+		</where>		
+	</delete>
+	<!-- 내가 쓴 댓글 -->
+	<select id="myReply" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[select b.* from(
+			select rownum rn,p.* from(
+				select reply_idx,post_idx,brd_idx,reply_content,reply_update,reply_regtime,
+      				(select brd_menu_link from board_menu bm where 
+            			(select bl.brd_menu_idx from board_list bl where bl.brd_idx=rp.brd_idx)=bm.brd_menu_idx) brd_menu_link,
+            		(select post_title from board_post_20000 bp2 where bp2.post_idx=rp.post_idx) post_title,
+            		(select brd_name from board_list c where c.brd_idx=rp.brd_idx) brd_name 
+            	from reply_20000 rp where mem_id=#{userId} order by rp.reply_regtime desc )p
+        	where rownum <= #{cri.page} * #{cri.pageLen} and p.post_idx > 0) b 
+       	where rn > (#{cri.page} -1) * #{cri.pageLen} order by rn]]>
+	</select>
+	<!-- 내가 쓴 댓글 수 -->
+	<select id="myReplyCnt" resultType="int">
+		select count(post_idx) from reply_20000 where mem_id=#{userId} and post_idx > 0
+	</select>
+	<!-- 내가 쓴 게시물 삭제 -->
+	<delete id="myReplyDel" parameterType="java.util.List">
+		delete from reply_20000 
+		<where>
+			reply_idx in 
+			<foreach collection="list" item="item" open="(" close=")" separator=",">
+				 #{item}
+			</foreach>
+		</where>		
+	</delete>
+</mapper>

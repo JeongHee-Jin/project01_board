@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.project01.mappers.ReplyMapper">
+	<resultMap id="replyMap" type="replyVO">
+		<result property="replyId" 			column="reply_idx" />
+		<result property="postId" 			column="post_idx" />
+		<result property="brdId" 			column="brd_idx" />
+		<result property="memId" 			column="mem_id" />
+		<result property="memNickName" 		column="mem_nickname" />
+		<result property="rpContent" 		column="reply_content" />
+		<result property="rpRegtime"	 	column="reply_regtime" />
+		<result property="rpUpdatetime"		column="reply_update" />
+		<result property="rpGroup"	 		column="reply_group" />
+		<result property="rpStep" 			column="reply_step" />
+		<result property="rpIndent" 		column="reply_indent" />
+		<result property="rpBlame" 			column="reply_blame" />
+		<result property="rpDel" 			column="reply_del" />	
+	</resultMap>
+	
+	<!-- 댓글리스트 -->
+	<select id="listReply" resultMap="replyMap">	
+	<![CDATA[select s.* from(
+		select rownum rn,p.* from( /*+INDEX_ASC(reply_${nav})*/ 
+		select * from reply_${nav} 
+		where post_idx=#{postId} 
+		order by reply_group asc, reply_step ASC) p 
+		where rownum <=#{cri.page} * #{cri.pageLen} order by rn ASC  ) s 		
+		where post_idx > 0  and rn > (#{cri.page}-1)*#{cri.pageLen}]]>
+		
+<!-- 		<![CDATA[select * from (select /*+INDEX_ASC(board_${brdKey}_reply))*/
+		rownum rn,reply_idx,post_idx,mem_writer,reply_content,
+		reply_regtime,reply_group,reply_step,reply_indent from board_${brdKey}_reply
+		where post_idx=#{brdId} and reply_idx>0 
+		and rownum <=#{cri.page} * #{cri.pageLen})
+		where rn > (#{cri.page}-1)*#{cri.pageLen}]]> -->
+	</select>
+	<!-- 댓글수 -->
+	<select id="replyCnt" resultType="int">
+		select count(reply_idx)	from reply_${nav} where post_idx =#{postId} 
+	</select>
+	
+	<!-- 댓글등록 -->
+	<insert id="createReply">
+		 insert into reply_${nav}
+	 	(reply_idx,post_idx,brd_idx,mem_id,mem_nickname,reply_content,reply_group)
+	 	values (reply_${nav}_seq.nextval,#{postId},#{brdId},#{memId},#{memNickName},
+	 	#{rpContent},reply_${nav}_seq.currval)
+	</insert>
+	
+	<!-- 댓글수정 -->
+	<update id="updateReply" >
+		<![CDATA[ update reply_${nav} set reply_content=#{rpContent} ,
+		reply_update = sysdate  
+		where reply_idx=#{replyId} and post_idx=#{postId}]]>
+	</update>
+	
+	<!-- 댓글삭제 -->
+	<delete id="deleteReply">
+		delete reply_${nav} where reply_idx=#{replyId} and post_idx=#{postId}
+	</delete>
+	
+	<!-- 게시글삭제시 댓글 전부 삭제 -->
+	<delete id="allDelete">
+		delete reply_${nav} where post_idx=#{postId}
+	</delete>
+</mapper> 

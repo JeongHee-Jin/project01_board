@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.project01.mappers.BoardAttachMapper">
+	<resultMap id="boardAttachMap" type="BoardAttachVO">
+		<result property="fileId" column="file_idx" />
+		<result property="uploadPath" column="upload_path" />
+		<result property="fileName" column="file_name" />
+		<result property="postId" column="post_idx" />
+	</resultMap>
+	
+	<insert id="insertFile" parameterType="BoardAttachVO" >
+		insert into board_attach_${nav} (file_idx,upload_path,file_name,post_idx)
+		values(#{fileId},#{uploadPath},#{fileName},#{postId})
+	</insert>
+	
+	<delete id = "deleteFile">
+		delete from board_attach_${nav} where post_idx=#{postId}
+	</delete>
+	
+	<select id = "fileList" resultType="BoardAttachVO" resultMap="boardAttachMap">
+		select * from board_attach_${nav} where post_idx=#{postId}
+	</select>
+	
+	<select id = "allFiles" resultType="BoardAttachVO" resultMap="boardAttachMap">
+		select * from 
+			(select * from board_attach_20000 union select * from board_attach_10000) 
+			where upload_path = to_char(sysdate,'/yyyy\mm')
+<!-- 		select * from (select * from board_attach_20000 union select * from board_attach_10000) 
+		where upload_path = to_char(sysdate-1,'yyyy\mm\dd') -->
+	</select>
+	
+	<!-- 어제 파일목록 처리 -->
+	<!-- <select id="oldFile" resultType="BoardAttachVO">
+		select * from board_attach_${nav} where upload_path = to_char(sysdate-1,'yyyy\mm\dd')
+	</select> -->
+</mapper>

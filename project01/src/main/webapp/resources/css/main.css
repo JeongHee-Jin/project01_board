@@ -1,0 +1,255 @@
+#main_body{
+	text-align: center;
+    padding: 50px 10px;
+    max-width: 1280px;
+    min-height:960px;
+    height: auto;
+    margin: auto;
+}
+#main_container{
+	position: relative;
+	width: 100%;
+	max-width:1280px;
+	min-height:1280px;
+	height:auto;
+	margin: auto;
+	text-align: left;
+	display: inline-block;
+}
+#main_left{
+	float: left;
+	display: block;
+	width:430px;
+    position: relative;
+    min-width: 430px;
+    margin-right: 30px;
+}
+#weather_div{
+	position: relative;
+	width: 430px;
+	float: left;
+	height: 250px;
+	margin-bottom: 50px;
+}
+#city{
+    float: right;
+    color:#7294eb;
+    padding-top: 15px;
+}
+#weather_back{
+	background: #f8fbff;
+	border-bottom:2px solid #7294eb;
+	display: inline-block;
+	height: 180px;
+}
+#graph_area{
+	padding-top: 39px;
+    position: absolute;
+    margin-left: 25px;
+}
+#weather_graph{
+	fill:none;
+}
+#weather_ul{
+	position: relative;
+    top: 30px;
+    margin-left: 25px;
+}
+#weather_ul .weather_item{
+	position: absolute;
+    right: auto;
+}
+#weather_ul dd{
+	display: block;
+}
+#weather_ul .dot_point{
+	width: 5px;
+    height: 5px;
+    display: block;
+    border: 1px solid #7294eb;
+    margin-left: auto;
+    margin-right: auto;
+    background: #7294eb;
+    border-radius: 5px;
+}
+#weather_ul ._icon{
+	text-align: right;
+	padding: 70px 0 20px 0;
+}
+
+#weather_ul .time_li{
+	position: relative;
+    float: left;
+    width: 86px;
+}
+#weather_ul ._width{
+	width:60px;
+}
+.weatherIcon._box{
+	height: 60px;
+    display: inline-block;
+}
+#weather_ul ._time{
+	font-size: 14px;
+	color:gray;
+    display: inline-block;
+}
+#weather_div .weatherTxt{
+	text-align:center;
+}
+#weather_div .weatherIcon{
+	width: 60px;
+}
+
+#banner_ad{
+ 	position: relative;
+    float: left;
+    width: 430px;
+    height: auto;
+    margin-bottom: 50px;
+}
+#banner_ad #slider{
+	position: absolute;
+}
+#banner_ad .mySlides {
+	display: none;
+}
+#slider .banner_img{
+	width: 430px;
+}
+#banner_ad .prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  margin-top: -22px;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+}
+#banner_ad .next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+#banner_ad .prev:hover, .next:hover {
+  background-color: rgba(0,0,0,0.8);
+}
+#banner_ad #counter{
+    position: absolute;
+    top: 45px;
+    left: 340px;
+    color: white;
+    background: rgba(0,0,0,0.25);
+    padding: 7px 25px;
+    border-radius: 30px;
+    font-size: 12px;
+}
+#banner_ad #img_dots{
+	padding-top: 365px;
+	text-align: right;
+}
+#banner_ad .dot {
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+#banner_ad .active, .dot:hover {
+  background-color: #717171;
+}
+
+#banner_ad .fade {
+  -webkit-animation-name: fade;
+  -webkit-animation-duration: 1.5s;
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+@-webkit-keyframes fade {
+  from {opacity: .4}
+  to {opacity: 1}
+}
+
+@keyframes fade {
+  from {opacity: .4}
+  to {opacity: 1}
+}
+
+/* 게시판메뉴--------- */
+#main_right{
+/* 	float: left;
+	width: 40%;
+	min-width: 300px; */
+}
+#board_nav, #tab_nav, #board_hot{
+	float: left;
+    width: 45%;
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+#main_right .group_box{
+	float: left;
+    width: 48%;
+}
+#main_right ._divtit{
+	background-color: #52bb64;
+    color: #fff;
+    padding: 10px 0 10px 10px;
+}
+#main_right .brd_name{
+	padding: 10px 0 10px 10px;
+    border-bottom: 1px solid #ddd;
+}
+#main_right ._left{
+	margin-right: 10px;
+}
+#banner_ad_r{
+	position: sticky;
+    top: 30px;
+    width: 1px;
+    height: 1px;
+    z-index: 1;
+	margin-left: 33px;;
+    display: inline-block;
+}
+@media(max-width:937px){
+	#banner_ad_r{
+		visibility: hidden;
+		display: none;
+	}
+}
+@media(max-width:880px){
+	#main_page {
+		display: inline-block;
+		min-height:1780px;
+		margin-bottom: 100px;
+	}
+	#main_left{
+		top:850px;
+		margin: auto;
+		float: none;
+		margin-bottom: 100px;
+		/* visibility: hidden;
+		display: none; */
+	}
+	#main_right {
+		position: relative;
+    	top: -1232px;
+	   	width: auto;
+	   	margin: auto;
+	}
+	#board_nav,  #tab_nav, #board_hot{
+		float: left;
+    	width: 100%;
+	}
+}
+
+}

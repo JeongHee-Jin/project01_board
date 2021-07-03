@@ -1,0 +1,14 @@
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	Root Context: defines shared resources visible to all other web components
+
+ 	<bean id="careerAlarmService" class="org.project01.util.AutoDelete" />
+  <task:scheduler id="gsScheduler" pool-size="10" />
+ <task:executor id="gsTaskExecutor" pool-size="10" />
+ <task:annotation-driven executor="gsTaskExecutor" scheduler="gsScheduler" />
+ </beans>
+ -->

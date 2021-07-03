@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace= "org.project01.mappers.MemberMapper">
+	<resultMap id="userMap" type="UserDetailsVO">
+		<result property="userId" column="mem_id" />
+		<result property="userPw" column="mem_pw" />
+		<result property="userNickName" column="mem_nickname" />
+		<result property="role" column="mem_role" />
+	</resultMap>
+	<resultMap id="memberMap" type="MemberVO">
+		<result property="userId" column="mem_id" />
+		<result property="userPw" column="mem_pw" />
+		<result property="userNickName" column="mem_nickname" />
+		<result property="phoneNum" column="mem_phoneNum" />
+		<result property="postCode" column="mem_postcode" />
+		<result property="roadAddr" column="mem_roadAddr" />
+		<result property="detailAddr" column="mem_detailAddr" />
+		<result property="email" column="mem_email" />
+		<result property="regDate" column="mem_regdate" />
+		<result property="role" column="mem_role" />
+		<result property="levDate" column="mem_levdate" />
+	</resultMap>
+ 	<resultMap type="AuthVO" id="authMap">
+		<result property="userid" column="userid" />
+		<result property="role" column="role" />
+	</resultMap>
+	<!-- 아이디 중복체크 -->
+	<select id="idCheck" resultType="int">
+		select count(*) from member_info where mem_id=#{userId}
+	</select>
+	<!-- 닉네임 중복체크 -->
+	<select id="nickCheck" resultType="int">
+		select count(*) from member_info where mem_nickname=#{nickName}
+	</select>
+	<!-- 이메일 중복체크 -->
+	<select id="emailCheck" resultType="int">
+		select count(*) from member_info where mem_email=#{email}
+	</select>
+	<!-- 회원가입 -->
+	<insert id="join" parameterType="MemberVO">
+		insert into  member_info (mem_id,mem_pw,mem_nickname,mem_phoneNum,mem_postcode,mem_roadAddr,mem_detailAddr,mem_email, mem_regdate,mem_role)
+		values (#{userId},#{userPw},#{userNickName},#{phoneNum,jdbcType=VARCHAR},#{postCode,jdbcType=VARCHAR},#{roadAddr,jdbcType=VARCHAR},
+		#{detailAddr,jdbcType=VARCHAR},#{email},sysdate,'ROLE_MEMBER')
+	</insert>
+	<!-- 로그인 -->
+	<select id="loginCheck" resultType="int">
+		select count(*) from member_info where mem_id=#{userId}
+	</select>
+	<!-- ID 찾기 (정보비교) -->
+	<select id="findId" resultType="int">
+		select count(*) from member_info where mem_email=#{email}
+	</select>
+	<!-- PW 찾기 (정보비교) -->
+	<select id="findPw" resultType="int">
+		select count(*) from member_info where mem_id=#{userId} and mem_email=#{email}
+	</select>
+	<!-- ID값 불러오기 -->
+	<select id="resultId" resultType="String">
+		select mem_id from member_info where mem_email=#{email}
+	</select>
+	<!-- UserDetails -->
+	<select id="userInfo" resultMap="userMap"  resultType="UserDetailsVO">
+		select mem_id,mem_pw,mem_nickname,mem_role from member_info where mem_id=#{userId} and mem_role!='ROLE_LEAVE'
+	</select>
+	<!-- 로그인 - 암호화 적용 -->
+	<select id="loginBcrypt" resultMap="memberMap">
+	<![CDATA[select mem_id,mem_pw,mem_role
+			 from member_info
+			 where mem_id=#{userId} and mem_pw=#{userPw}]]>
+	</select>
+	<!-- 비밀번호 -> 임시 비밀번호로 변경 -->
+	<update id="changePw" parameterType="map">
+		update member_info set mem_pw=#{pw} where mem_email=#{email}
+	</update>
+	<!-- 내정보 불러오기 -->
+	<select id="mypageInfo" resultType="memberVO" resultMap="memberMap">
+		select mem_id,mem_nickname,mem_phoneNum,mem_postcode,mem_roadAddr,
+		mem_detailAddr, mem_email 
+		from member_info where mem_id=#{userId}
+	</select>
+	<!-- 회원정보수정 -->
+	<update id="nickModify" parameterType="hashmap">
+		update member_info set mem_nickname=#{nick} where mem_id=#{id}
+	</update>
+	<update id="pwModify" parameterType="hashmap">
+		update member_info set mem_pw=#{pw} where mem_id=#{id}
+	</update>
+	<update id="emailModify" parameterType="hashmap">
+		update member_info set mem_email=#{email} where mem_id=#{id}
+	</update>
+	<update id="phoneModify" parameterType="hashmap">
+		update member_info set mem_phoneNum=#{phone} where mem_id=#{id}
+	</update>
+	<update id="addrModify" parameterType="hashmap">
+		update member_info set mem_postcode=#{postCode,jdbcType=VARCHAR},mem_roadAddr=#{roadAddr,jdbcType=VARCHAR},
+		mem_detailAddr=#{detailAddr,jdbcType=VARCHAR} where mem_id=#{id}
+	</update>
+
+	<!-- 회원탈퇴 -->
+	<update id="memLeave" parameterType="hashmap">
+		update member_info set mem_role='ROLE_LEAVE', mem_levdate=sysdate where mem_id=#{userId}
+	</update>
+	
+	<!-- 탈퇴한 유저 리스트 -->
+	<select id="levMem" resultType="memberVO" resultMap="memberMap">
+		select mem_id,mem_role,mem_levdate from member_info where mem_role='ROLE_LEAVE'
+	</select>
+</mapper>
