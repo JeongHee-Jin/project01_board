@@ -161,7 +161,7 @@
 > 아이디, 이메일, 닉네임 입력시 DB 데이터와 비교해 중복 확인을 합니다.
   * **화면기능**
   * **기능구현 (아이디만 작성)**
-	+ member.js: 아이디, 이메일, 닉네임 입력시 DB 데이터와 비교해 중복 확인을 ajax 비동기식으로 구현했습니다.
+	+ member.js: 아이디, 이메일, 닉네임 입력시 DB 데이터와의 중복 확인을 ajax 비동기식으로 구현했습니다. 비교 후 안내 문구를 보여줍니다.
 	```java
 	$.ajax({
 		url: "/member/id_check",
@@ -182,7 +182,7 @@
 	})
 	```
 	
-	+ MemberController
+	+ MemberController: 입력한 아이디 값을 받아 비교 후 값을 출력합니다.
 	```java
 	//아이디 중복체크
 	@PostMapping("/id_check")
@@ -249,7 +249,8 @@
 		}		
 	}
 	```
-	 * root-context.xml: localhost로 실행할 땐 구글 아이디/ 비밀번호 입력으로 이메일이 보내지지만 aws 서비스시 보안 문제로 메일 전송이 안되므로 계정 2차 인증을 한 후 <span style="color:blue">2차 비밀번호</span>를 적어야 합니다.
+	 * root-context.xml: localhost로 실행할 땐 구글 아이디/ 비밀번호 입력으로 이메일이 보내지지만 aws 서비스시 보안 문제로 메일 전송이 안되므로 계정 ```2차 인증을 한 후 
+	 2차 비밀번호```를 적어야 합니다.
 	 ```java
 	 <!-- 메일 보내기 (SEND) -->
 	   <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
@@ -296,7 +297,7 @@
 		return "redirect:/";
 	}
 	```  
- 	 * MemberServiceImpl: BcryptPasswordEncoder로 입력한 비밀번호를 암호화해 MemberVO에 주입한 후 memberDAO로 전송합니다.
+ 	 * MemberServiceImpl: ```BcryptPasswordEncoder```로 입력한 비밀번호를 암호합니다.
 	```java
 	//회원가입/비밀번호 암호화
 	@Override
@@ -307,7 +308,7 @@
 	}
 	```  
 	
- 	 * memberMapper.xml: DB에 MemberVO 값을 저장합니다.(#{}='값'/ ${}=값, jdbcType=VARCHAR: 파라미터값이 null인걸 허용함)
+ 	 * memberMapper.xml: DB에 MemberVO 값을 등록합니다.(#{}='값'/ ${}=값, jdbcType=VARCHAR: 파라미터값이 null인걸 허용함)
    	```java
 	<!-- 회원가입 -->
 	<insert id="join" parameterType="MemberVO">
@@ -488,7 +489,7 @@
 > 
   * **화면구현**
   * **기능구현**
-	*  MemberController: 네이버 로그인 성공시 인증 토큰값을 가져와 사용자 정보를 받아 가입여부를 확인한 후 로그인을 진행한다.
+	*  MemberController: 네이버 로그인 성공시 인증 토큰을 가져와 그 값으로 사용자 정보를 받아 가입여부를 확인한 후 로그인을 진행한다.
 	```java
 	@RequestMapping(value = "/naver_callback", method = { RequestMethod.GET, RequestMethod.POST })	
 	public String callback(HttpServletRequest request,Model model, @RequestParam String code, 
@@ -573,8 +574,8 @@
 
 
 **3. 아이디 찾기/ 비밀번호 찾기**
-> 아이디 찾기: 가입한 이메일을 입력해 해당 계정의 아이디를 보여줍니다.  
-> 비밀번호 찾기: 가입한 아이디와 이메일 입력 후 가입한 이메일로 임시 비밀번호를 전송합니다. 코드 전송 후 코드를 암호화해 해당 회원의 비밀번호 DB를 수정합니다.  
+> **아이디 찾기:** 가입한 이메일을 입력해 해당 계정의 아이디를 보여줍니다.  
+> **비밀번호 찾기:** 가입한 아이디와 이메일 입력 후 가입한 이메일로 임시 비밀번호를 전송합니다. 코드 전송 후 코드를 암호화해 해당 회원의 비밀번호 DB를 수정합니다.  
 >  
   * **화면구현**
   * **기능구현**
@@ -616,7 +617,35 @@
 	</update>
 	```
 -----
+### 게시판 리스트 공통 기능
+   1. 공지 숨기기 
+      * 전체공지와 게시판의 공지를 숨길 수 있습니다.
+      ```java
+      
+      ```
 
+   2. 목록 개수
+      * 페이지에 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
+
+   3. 게시물 번호
+      * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
+
+   4. 댓글 개수 
+      * 시물 댓글 수가 1개 이상일 때 제목 옆에 표시됩니다.
+
+   5. 답글 구분
+      * └RE: 표시로 답글 게시물을 구분할 수 있습니다.
+
+   6. 게시물 날짜
+      * 당일 올린 게시물은 올린 시간으로 표시되며 다음날이 되면 날짜로 보여줍니다.
+
+   7. 페이징
+      * 한 페이지의 목록 출력 개수 초과시 다음 페이지 번호를 생성해 다음글을 볼 수 있습니다.
+      * 이지 10개 초과 시 다음> 버튼 생성, 현재 페이지가 11 이상이면 <이전 버튼 생성
+
+   8. 검색
+      * 색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
+      
 ### 공지
 * **사용자별 권한**  
    |사용자|글 읽기|글 쓰기|글 수정|글 삭제|
@@ -656,10 +685,12 @@
 	}
 	```
 	
-	* boardMapper.xml: DB 공지테이블에 정보를 등록합니다. 공지 페이지는 답글기능이 없어 group(게시물번호)값을 넣지 않습니다.(selectkey에 대한 설명은 아래 글쓰기에 설명)
+	* boardMapper.xml
+	 	* 공지 페이지는 답글기능이 없어 group(게시물번호)값을 넣지 않습니다.(selectkey에 대한 설명은 아래 글쓰기에 적혀있음)
+	 	* 공지글 여부 컬럼 post_notice: 'T'=전체공지, 'Y'=게시판공지, 'N'= 
 	```java
 	<!-- register : 글쓰기 (공지,커뮤니티)-->
-	<insert id="createPage1" parameterType="BrdVO">
+	<insert id="createCmuPage" parameterType="BrdVO">
 	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
 			select board_post_${nav}_seq.currval as postId from dual
 		</selectKey>
@@ -727,44 +758,24 @@
 		}
 	}
 	```
+
 **1. 전체/ 인기글** 
-> 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개) 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
+> 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개)   
+> 전체는 커뮤니티에 존재하는 모든 글을 보여주며, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
   * boardMapper.xml
-   	* board_regtime column: DECODE 함수를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 시간으로 표시, 아니면 'YYYY.MM.DD' 날짜로 표시됩니다.
+  	* 전체공지: 공지테이블(board_post_10000)에 공지여부(post_notice) 컬럼 값이 'T'인 게시물을 가져온다.
+   	* board_regtime column: ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 시간으로 표시, 아니면 'YYYY.MM.DD' 날짜로 표시됩니다.
    				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)
 	* fileY column: 각 리스트의 파일 수를 가져와 0 초과면 파일첨부 아이콘이 표시됩니다.
+	* 인기글: ```post_hit>=50 or reply_cnt>=50``` 조건으로 인기글 목록을 출력합니다.
 	```java
 	<!-- 공지사항 : 전체공지 -->
-	<select id="noticeListT" resultType="BrdVO" resultMap="boardMap">
+	<select id="noticeListTotal" resultType="BrdVO" resultMap="boardMap">
 		<![CDATA[select b.*,(select count(*) from board_attach_10000 ba where ba.post_idx(+)=b.post_idx)as fileY 
 		from board_post_10000 b where post_notice='T' and rownum<=5 order by post_idx desc]]>
 	</select>
-	<!-- 게시판 : total-->
-	<select id="listSearchTotal" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
-		 <![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname, 
-			b.post_notice, b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
-			DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
-	        ,TO_CHAR(b.post_regtime,'YY.MM.DD')) board_regtime, 
-	        (select count(*) from board_attach_20000 ba where ba.post_idx=b.post_idx)as fileY 	        
-			from(
-				select a.* from(
-					select  ROWNUM rn, p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
-						select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
-						from board_post_${nav} bp where post_notice='N' 
-					order by post_group DESC, post_step ASC,post_indent ASC) p where 1=1]]>
-			<include refid="search" />
-	        <![CDATA[ order by rn ASC) a 
-	        	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0) b , board_list c
-	        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
-     </select>
-	```
- 
-**2. 인기글**
-> 조회수 50 이상 또는 댓글 50개 이상인 글만 인기글 리스트에 표시됩니다.
-  * boardMapper.xml: 'post_hit>=50 or reply_cnt>=50' 조건으로 인기글 목록을 출력합니다.
-	```java
 	<!-- 게시판 : hot -->
-	<select id="listSearchHot" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<select id="cmuHotSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 	<![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
         b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
 		DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
@@ -777,71 +788,237 @@
 				from board_post_${nav} bp where post_notice='N'
 			order by post_group DESC, post_step ASC,post_indent ASC) p where 1=1]]>
 		<include refid="search" />
-        <![CDATA[ order by rn ASC) a
+        	<![CDATA[ order by rn ASC) a
        	 	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0 and post_hit>=50 or reply_cnt>=50) b , board_list c
        	 where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
-	</select>	
+	</select>
 	```
-**3. 게시판/ 카테고리**
+**2. 게시판/ 카테고리**
 > 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다.
   *  boardMapper.xml
+   	* 게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.
+   	* 답글 기능: ```order by post_group DESC, post_step ASC,post_indent ASC```으로 답글을 정렬합니다.
+   	* 게시판: ```brd_idx=${mid}``` 선택한 게시판에 ```b.cate_idx=d.cate_idx(+)``` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.
+   		[이미지넣기]
+   	* 카테고리:``` cate_idx=${sub}``` 선택한 카테고리와 ```b.cate_idx=d.cate_idx``` 동일한 카테고리 게시물을 출력합니다.
 	```java
 	<!-- 게시판별 공지 -->
-	<select id="noticeListB" resultType="BrdVO" resultMap="boardMap">
+	<select id="noticeListBoard" resultType="BrdVO" resultMap="boardMap">
 		<![CDATA[select bp.*,bc.cate_name,(select count(*) from board_attach_20000 ba where ba.post_idx(+)=bp.post_idx)as fileY 
 		from ( select *from board_post_${nav} where post_notice='Y' and brd_idx=#{mid} )bp, brd_category bc 
 		where bp.cate_idx=bc.cate_idx(+) and rownum<=5 order by post_idx desc ]]>
 	</select>
+	<!-- 게시판 : 게시판 클릭-->
+	<select id="cmuBoardSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select 생략 from(
+			select a.* from(
+				select rownum rn,p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+					from board_post_${nav} bp 
+					where post_notice='N' order by post_group DESC, post_step ASC,post_indent ASC) p 
+				where brd_idx=${mid}]]>
+			<include refid="search" />
+			<![CDATA[order by rn ASC ) a
+       		 	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0  ) b,brd_category d 
+       	 	where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx(+) order by rn]]>
+	</select>
+	<!-- 게시판 : 카테고리 클릭 -->
+	<select id="cmuCateSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<![CDATA[select 생략 from(
+			select ROW_NUMBER() OVER(ORDER BY rn desc) as pno, a.* from(
+				select rownum rn,p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+					from board_post_${nav} bp 
+					where post_notice='N' order by post_group DESC, post_step ASC,post_indent ASC) p 
+				where cate_idx=${sub}]]>
+			<include refid="search" />
+			<![CDATA[order by rn ASC ) a
+        		where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0  ) b ,brd_category d 
+       		where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx order by pno desc]]>
+	</select>
 	```
+	
 ### 글쓰기
-1.공지글 체크
-   * 관리자 권한만 사용 가능하며 '전체','인기글' 메뉴을 제외한 모든 게시판에서 사용 가능합니다.
-2. 게시판/ 카테고리 목록
-   * 전체/ 인기글에서 '글쓰기' 버튼 클릭시 커뮤니티에 존재하는 모든 게시판 목록을 보여줍니다.
-   * 게시판 선택은 필수입니다.
-   * 게시판 선택 시 해당 게시판의 카테고리를 출력합니다.
-   * 카테고리는 선택사항입니다.
-3. 글쓰기 에디터
-   * 폰트, 크기, 굵기, 정렬 등의 기능을 사용해 게시글을 꾸밀 수 있습니다.
-4. 파일첨부
-   * 첨부 아이콘 클릭 시 내 컴퓨터내에 존재하는 파일을 첨부할 수 있습니다.
-   * 첨부 가능한 파일은 2MB이하, 확장자 .exe,.sh,.alz를 제외한 파일입니다.
-   * 첨부한 파일은 Amazon S3에 저장됩니다.
+**1. 게시판/ 카테고리 목록**
+> 전체/ 인기글에서 '글쓰기' 버튼 클릭시 커뮤니티에 존재하는 모든 게시판 목록을 보여주고 접속된 게시판에서 '글쓰기' 버튼 클릭시 해당 게시판 메뉴의 게시판 목록을 보여줍니다.
+> 게시판 선택은 필수이고 카테고리는 선택사항 입니다.
+> 게시판 선택 시 해당 게시판의 카테고리를 출력합니다.
+  * brdController: 글쓰기 페이지 접속시 해당 게시판 메뉴의 게시판 목록과 카테고리를 불러옵니다. 다른 게시판으로 변경시 카테고리 목록도 변경됩니다.
+	```java
+	//글쓰기페이지출력
+	@RequestMapping(value="/register", method=RequestMethod.GET)
+	public void registerGET(@ModelAttribute("nav")String nav, @ModelAttribute("mid")String mid,
+			Model model,SearchCriteria cri) throws Exception{
+		logger.info("글쓰기페이지");
+		try {
+			if(mid.equals("")) { //전체,인기글에서 글쓰기시 커뮤니티의 게시판 리스트 전체를 출력합니다.
+				model.addAttribute("brd",service.cmuBrdNameList());
+			}else {
+				model.addAttribute("brd",service.brdNameListCla(mid));  //접속된 게시판리스트
+				model.addAttribute("cate",service.cateNameListMid(mid));//접속된 게시판의 카테고리리스트
+			}		
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	//게시판 말머리출력
+	@RequestMapping(value="/catelist",method=RequestMethod.POST)	
+	public @ResponseBody List<Map<String,Object>> brdNav(
+			@ModelAttribute("mid")String mid, Model model) throws Exception{
+		logger.info("게시판 말머리 출력");
+		List<Map<String,Object>> cateN=  new ArrayList<Map<String, Object>>();
+		try {
+			cateN=service.cateNameListMid(mid); //카테고리리스트
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}	
+		return cateN;
+	}
+	```
+	
+**2. 글쓰기 에디터**
+> 폰트, 크기, 굵기, 정렬 등의 기능을 사용해 게시글을 꾸밀 수 있습니다.
+   * register.js: iframe의 디자인모드를 실행해 iframe에 적힌 글을 꾸밉니다.
+   ```java
+   	//iframe 디자인모드
+	var iframe= document.getElementById("content_iframe").contentWindow;
+	var iframeD = iframe.document;	
+	iframeD.designMode = 'on';
+	var iframeE = document.getElementById("content_iframe");
+	iframe.focus();	
+	document.getElementById("content_iframe").contentDocument
+				.body.style.fontFamily  = "NanumSquareRound";
+				
+   ```
+   
+**3. 파일첨부**
+> 첨부 아이콘 클릭 시 내 컴퓨터 내에 존재하는 파일 2MB이하, 확장자 .exe,.sh,.alz를 제외한 파일을 첨부할 수 있습니다.
+> 첨부한 파일은 Amazon S3에 저장되지만 글쓰기 완료 전까진 DB에는 저장되지 않습니다.
+   * uploadController
+   	* UUID.randomUUID를 사용해 고유 파일명을 생성합니다. 
+   	* 고유 식별자를 생성하는 이유는 첨부파일 다운로드시 다른 파일과 혼동하지 않게하며 다른 컨텐츠의 임의 접근을 방지합니다.	
+   ```java
+	//파일등록 : ajax로 파일 경로생성 및 파일 저장 , DB접속 X
+	@PostMapping(value = "/uploadAws",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<List<BoardAttachVO>> awsS3Upload(MultipartFile[] uploadFile) 
+			throws IOException {
+		List<BoardAttachVO> list = new ArrayList<BoardAttachVO>();
+		
+		//저장할 폴더 경로
+		try {
+			String uploadFolderPath = getFolder();
+			for (MultipartFile multipartFile : uploadFile) {
+				BoardAttachVO attachDTO = new BoardAttachVO();
+				//폴더
+				attachDTO.setUploadPath(uploadFolderPath);
+				//파일이름
+				String uploadFileName = multipartFile.getOriginalFilename();
+				
+				uploadFileName = uploadFileName.substring(uploadFileName.lastIndexOf("\\")+1);
+				attachDTO.setFileName(uploadFileName);
+				//uuid 넣기
+				UUID uuid = UUID.randomUUID();
+				attachDTO.setFileId(uuid.toString());	
+				uploadFileName = uuid.toString() + "_" + uploadFileName;				
+				awsS3.uploadMeta(multipartFile, uploadFolderPath,uploadFileName);
+				list.add(attachDTO);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(list, HttpStatus.OK);
+	}				
+   ```
+   * AwsS3: accessKey, secretKey, clientRegion를 사용해 awsS3 클라이언트를 생성하고 bucket명을 통해 해당 S3 bucket에 올린 파일을 저장합니다.
+	* ClasspathPropertiesFileCredentialsProvider(): 해당 생성자가 프로젝트의 classpath에 있는 AwsCredentials.properties 파일을 읽어 
+    		안에 있는 accessKey, secretKey 값을 자동으로 사용합니다.
+   ```java
+    //aws S3 client 생성
+    private void createS3Client() {
+        //AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+        this.s3Client = AmazonS3ClientBuilder
+                .standard()
+                .withCredentials(new ClasspathPropertiesFileCredentialsProvider())
+                //.withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withRegion(clientRegion)
+                .build();
+    }
+    //s3에 파일 저장
+    public void uploadMeta(MultipartFile mfile,String uploadFolderPath,String uploadFileName) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentType(mfile.getContentType());
+        objectMetadata.setContentLength(mfile.getSize());  
+        try (InputStream inputStream = mfile.getInputStream()) {
+        	s3Client.putObject(new PutObjectRequest(this.bucket+uploadFolderPath, uploadFileName, inputStream,
+		objectMetadata).withCannedAcl(CannedAccessControlList.PublicRead));
+        } catch (IOException e) {
+            throw new IllegalArgumentException(String.format("파일 변환 중 에러가 발생하였습니다"));
+        }
+    }				
+   ```
 
-### 글수정
-* 수정을 원하는 글이 공지글이면 공지글 체크되어 표시되고 게시판, 카테고리, 제목과 내용, 첨부파일이 표시됩니다.
+**4. 글쓰기등록**
+> 폰트, 크기, 굵기, 정렬 등의 기능을 사용해 게시글을 꾸밀 수 있습니다.
+   * boardMapper.xml: 
+   	* selectKey를 사용해 등록시 생성되는 게시물 번호를 다음 쿼리로 return해 첨부파일이 있으면 첨부파일 쿼리에 게시물 번호를 넣어줍니다.
+   	* post_group 컬럼에 게시물 번호를 등록해서 부모글 표시를 합니다.
+   ```java
+	<insert id="createCmuPage" parameterType="BrdVO">
+	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
+			select board_post_${nav}_seq.currval as postId from dual
+		</selectKey>
+	 	insert into board_post_${nav} 
+		(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_notice,post_group)
+		values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+		#{title},#{content},#{memId},#{memNickName},#{notice},board_post_${nav}_seq.currval)
+	</insert>
+   ```
+   * boardAttachMapper.xml: 첨부한 파일의 정보(파일식별자, 경로, 파일이름, 게시물번호)를 DB에 등록합니다. 
+   ```java
+   <insert id="insertFile" parameterType="BoardAttachVO" >
+	insert into board_attach_${nav} (file_idx,upload_path,file_name,post_idx) 
+	values(#{fileId},#{uploadPath},#{fileName},#{postId})
+   </insert>
+   ```
 
+### 게시물 보기
+   1. 이전글/ 다음글
+      * 현재 게시판 내 이전글과 다음글로 이동합니다.
+      
+   2. URL복사
+      * 해당 게시물의 주소가 복사됩니다.
 
+   3. 첨부파일 목록/ 다운로드
+      * 첨부된 파일 목록이 표시되며 클릭시 다운로드 됩니다.
+
+   4. 게시물 댓글 목록
+      * 해당 게시물의 총 댓글수가 표시되며 내가 쓴 게시물
+         
+### 글 수정
+> 수정을 원하는 글의 공지글 체크여부, 게시판, 카테고리, 제목과 내용, 첨부파일이 표시됩니다.
+   * boardMapper.xml: 
+   ```java
+
+   ```
+   * boardAttachMapper.xml: 첨부한 파일의 정보(파일식별자, 경로, 파일이름, 게시물번호)를 DB에 등록합니다. 
+   ```java
+
+   ```
+### 글 삭제
+> 수정을 원하는 글의 공지글 체크여부, 게시판, 카테고리, 제목과 내용, 첨부파일이 표시됩니다.
+   * boardMapper.xml: 
+   ```java
+
+   ```
+   * boardAttachMapper.xml: 첨부한 파일의 정보(파일식별자, 경로, 파일이름, 게시물번호)를 DB에 등록합니다. 
+   ```java
+
+   ```
 ### 답글 쓰기
-* 공지글 체크가 표시되지 않아 공지글로 등록할 수 없습니다.
-* 게시판을 바꿔서 작성할 순 없지만 카테고리는 수정 가능합니다.
+> 공지글 체크가 표시되지 않아 공지글로 등록할 수 없습니다.
+> 게시판을 바꿔서 작성할 순 없지만 카테고리는 수정 가능합니다.
 
-### 게시판 공통기능
-#### 게시판 목록 페이지
-   1. 공지 숨기기 
-      * 전체공지와 게시판의 공지를 숨길 수 있습니다.
-
-   2. 목록 개수
-      * 페이지에 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
-
-   3. 게시물 번호
-      * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
-
-   4. 댓글 개수 
-      * 시물 댓글 수가 1개 이상일 때 제목 옆에 표시됩니다.
-
-   5. 답글 구분
-      * └RE: 표시로 답글 게시물을 구분할 수 있습니다.
-
-   6. 게시물 날짜
-      * 당일 올린 게시물은 올린 시간으로 표시되며 다음날이 되면 날짜로 보여줍니다.
-
-   7. 페이징
-      * 한 페이지의 목록 출력 개수 초과시 다음 페이지 번호를 생성해 다음글을 볼 수 있습니다.
-      * 이지 10개 초과 시 다음> 버튼 생성, 현재 페이지가 11 이상이면 <이전 버튼 생성
-
-   8. 검색
-      * 색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
 
 #### 게시물 페이지
    1. 이전글/ 다음글
