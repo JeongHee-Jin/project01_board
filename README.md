@@ -617,34 +617,6 @@
 	</update>
 	```
 -----
-### 게시판 리스트 공통 기능
-   1. 공지 숨기기 
-      * 전체공지와 게시판의 공지를 숨길 수 있습니다.
-      ```java
-      
-      ```
-
-   2. 목록 개수
-      * 페이지에 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
-
-   3. 게시물 번호
-      * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
-
-   4. 댓글 개수 
-      * 시물 댓글 수가 1개 이상일 때 제목 옆에 표시됩니다.
-
-   5. 답글 구분
-      * └RE: 표시로 답글 게시물을 구분할 수 있습니다.
-
-   6. 게시물 날짜
-      * 당일 올린 게시물은 올린 시간으로 표시되며 다음날이 되면 날짜로 보여줍니다.
-
-   7. 페이징
-      * 한 페이지의 목록 출력 개수 초과시 다음 페이지 번호를 생성해 다음글을 볼 수 있습니다.
-      * 이지 10개 초과 시 다음> 버튼 생성, 현재 페이지가 11 이상이면 <이전 버튼 생성
-
-   8. 검색
-      * 색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
       
 ### 공지
 * **사용자별 권한**  
@@ -768,6 +740,7 @@
    				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)
 	* fileY column: 각 리스트의 파일 수를 가져와 0 초과면 파일첨부 아이콘이 표시됩니다.
 	* 인기글: ```post_hit>=50 or reply_cnt>=50``` 조건으로 인기글 목록을 출력합니다.
+	
 	```java
 	<!-- 공지사항 : 전체공지 -->
 	<select id="noticeListTotal" resultType="BrdVO" resultMap="boardMap">
@@ -793,14 +766,16 @@
        	 where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
 	</select>
 	```
+	
 **2. 게시판/ 카테고리**
 > 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다.
   *  boardMapper.xml  
-	* 게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.  
-   	* 답글 기능: ```order by post_group DESC, post_step ASC,post_indent ASC```으로 답글을 정렬합니다.  
-   	* 게시판: ```brd_idx=${mid}``` 선택한 게시판에 ```b.cate_idx=d.cate_idx(+)``` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.
+	+ 게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.  
+   	+ 답글 기능: ```order by post_group DESC, post_step ASC,post_indent ASC```으로 답글을 정렬합니다.  
+   	+ 게시판: ```brd_idx=${mid}``` 선택한 게시판에 ```b.cate_idx=d.cate_idx(+)``` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.
    		[이미지넣기]  
-   	* 카테고리:``` cate_idx=${sub}``` 선택한 카테고리와 ```b.cate_idx=d.cate_idx``` 동일한 카테고리 게시물을 출력합니다.  
+   	+ 카테고리:``` cate_idx=${sub}``` 선택한 카테고리와 ```b.cate_idx=d.cate_idx``` 동일한 카테고리 게시물을 출력합니다.  
+	
 ```java
 	<!-- 게시판별 공지 -->
 	<select id="noticeListBoard" resultType="BrdVO" resultMap="boardMap">
@@ -837,7 +812,36 @@
        		where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx order by pno desc]]>
 	</select>
 ```
-	
+### 게시판 리스트 공통 기능
+   1. 공지 숨기기 
+      * 전체공지와 게시판의 공지를 숨길 수 있습니다.
+      ```java
+      
+      ```
+
+   2. 목록 개수
+      * 페이지에 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
+
+   3. 게시물 번호
+      * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
+
+   4. 댓글 개수 
+      * 시물 댓글 수가 1개 이상일 때 제목 옆에 표시됩니다.
+
+   5. 답글 구분
+      * └RE: 표시로 답글 게시물을 구분할 수 있습니다.
+
+   6. 게시물 날짜
+      * 당일 올린 게시물은 올린 시간으로 표시되며 다음날이 되면 날짜로 보여줍니다.
+
+   7. 페이징
+      * 한 페이지의 목록 출력 개수 초과시 다음 페이지 번호를 생성해 다음글을 볼 수 있습니다.
+      * 이지 10개 초과 시 다음> 버튼 생성, 현재 페이지가 11 이상이면 <이전 버튼 생성
+
+   8. 검색
+      * 색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
+
+
 ### 글쓰기
 **1. 게시판/ 카테고리 목록**
 > 전체/ 인기글에서 '글쓰기' 버튼 클릭시 커뮤니티에 존재하는 모든 게시판 목록을 보여주고 접속된 게시판에서 '글쓰기' 버튼 클릭시 해당 게시판 메뉴의 게시판 목록을 보여줍니다.
@@ -981,29 +985,61 @@
 	values(#{fileId},#{uploadPath},#{fileName},#{postId})
    </insert>
    ```
-
-### 게시물 보기
-   1. 이전글/ 다음글
-      * 현재 게시판 내 이전글과 다음글로 이동합니다.
-      
-   2. URL복사
-      * 해당 게시물의 주소가 복사됩니다.
-
-   3. 첨부파일 목록/ 다운로드
-      * 첨부된 파일 목록이 표시되며 클릭시 다운로드 됩니다.
-
-   4. 게시물 댓글 목록
-      * 해당 게시물의 총 댓글수가 표시되며 내가 쓴 게시물
-         
 ### 글 수정
-> 수정을 원하는 글의 공지글 체크여부, 게시판, 카테고리, 제목과 내용, 첨부파일이 표시됩니다.
+> 수정을 원하는 글의 작성자와 현재 접속한 유저의 정보가 일치하면 공지글 체크여부, 게시판, 카테고리, 제목과 내용, 첨부파일 데이터를 가져와 출력하고 
+> 다르면 홈페이지 메인으로 이동합니다. (view에 '수정' 버튼 활성화 조건을 이미 제시했지만 잘못된 경로로 접속하는것을 방지하기 위해 작성함)
    * boardMapper.xml: 
    ```java
-
-   ```
-   * boardAttachMapper.xml: 첨부한 파일의 정보(파일식별자, 경로, 파일이름, 게시물번호)를 DB에 등록합니다. 
-   ```java
-
+	//수정페이지 들어가기
+	@RequestMapping(value="/modify",method = RequestMethod.GET)
+	public String modifyGET(@ModelAttribute("nav")String nav,String mid,String post,
+			Model model,SearchCriteria cri,HttpServletRequest request) throws Exception{
+		logger.info("게시물 수정페이지");
+		Map<String,Object>map=new HashMap<String,Object>();
+		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();	
+		UserDetailsVO userDetails = (UserDetailsVO)principal;	
+		map.put("nav",nav);
+		map.put("mid",mid);
+		map.put("postId",post);
+		BrdVO vo=service.read(map,2);
+		try {
+			if(userDetails.getUserId().equals(vo.getMemId()) || userDetails.getRole().equals("ROLE_ADMIN")) {	
+				model.addAttribute(vo);					
+				model.addAttribute("brd",service.brdNameListCla(mid));
+				model.addAttribute("cate",service.cateNameListMid(mid));	
+			}else { 
+				String referer = (String)request.getHeader("REFERER");
+				if(referer==null) {
+					referer="redirect:/";
+				}
+				return referer;
+			}
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return "board/modify";
+	}
+	
+	//수정완료처리
+	@RequestMapping(value="/modify",method = RequestMethod.POST)
+	public String modifyPOST(@ModelAttribute("vo")BrdVO vo,Model model) throws Exception{
+		logger.info("게시물 수정 처리");
+		String str="redirect:/cmu/brd";
+		try {
+			model.addAttribute("nav",vo.getNav());
+			model.addAttribute("mid",vo.getBrdId());
+			if(vo.getNotice()==null) {vo.setNotice("N");}
+			service.modify(vo);			
+			if(vo.getNav().equals(10000)) {
+				str= "redirect:/notice";
+			}else {
+				str= "redirect:/cmu/brd";
+			}			
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}		
+		return str;		
+	}
    ```
 ### 글 삭제
 > 수정을 원하는 글의 공지글 체크여부, 게시판, 카테고리, 제목과 내용, 첨부파일이 표시됩니다.
@@ -1032,6 +1068,7 @@
 
    4. 게시물 댓글 목록
       * 해당 게시물의 총 댓글수가 표시되며 내가 쓴 게시물
+### 댓글기능
 
 ### 채팅
 > WebSocket을 사용해 다자간 채팅 기능을 제공합니다.
