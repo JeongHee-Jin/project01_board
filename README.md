@@ -795,9 +795,9 @@
 	```
 **2. 게시판/ 카테고리**
 > 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다.
-  *  boardMapper.xml
-   	* 게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.
-   	* 답글 기능: ```order by post_group DESC, post_step ASC,post_indent ASC```으로 답글을 정렬합니다.
+  *  boardMapper.xml  
+	* 게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.  
+   	* 답글 기능: ```order by post_group DESC, post_step ASC,post_indent ASC```으로 답글을 정렬합니다.  
    	* 게시판: ```brd_idx=${mid}``` 선택한 게시판에 ```b.cate_idx=d.cate_idx(+)``` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.
    		[이미지넣기]
    	* 카테고리:``` cate_idx=${sub}``` 선택한 카테고리와 ```b.cate_idx=d.cate_idx``` 동일한 카테고리 게시물을 출력합니다.
