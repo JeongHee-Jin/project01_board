@@ -632,7 +632,7 @@
 > **공지글:** 공지 게시판의 공지글로 등록됩니다.
   * **화면구현**
   * **기능구현**
-   	* BrdController: 접속한 유저의 아이디와 닉네임을 가져와 작성된 글을 등록합니다. 전체공지 또는 공지글 체크 안할시 'N'값을 넣어 일반 글 표시를 합니다. 
+  * BrdController: 접속한 유저의 아이디와 닉네임을 가져와 작성된 글을 등록합니다. 전체공지 또는 공지글 체크 안할시 'N'값을 넣어 일반 글 표시를 합니다. 
 	```java
 	//글쓰기 등록
 	@RequestMapping(value="/register",method=RequestMethod.POST)
@@ -683,7 +683,11 @@
 	|관리자|O|O|O|O|O|
 * **화면구현**
 * **기능구현**
- 	* BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
+ 	
+**1. 전체/ 인기글** 
+> 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개)   
+> 전체는 커뮤니티에 존재하는 모든 글을 보여주며, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
+	 * BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
 	```java
 	@RequestMapping(value = "/brdnormal", method=RequestMethod.GET)
 	public void tabCla(@ModelAttribute("nav")String nav,@ModelAttribute("cla")String cla,
@@ -731,10 +735,6 @@
 		}
 	}
 	```
-
-**1. 전체/ 인기글** 
-> 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개)   
-> 전체는 커뮤니티에 존재하는 모든 글을 보여주며, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
   * boardMapper.xml
   	* 전체공지: 공지테이블(board_post_10000)에 공지여부(post_notice) 컬럼 값이 'T'인 게시물을 가져온다.
 	* 인기글: ```post_hit>=50 or reply_cnt>=50``` 조건으로 인기글 목록을 출력합니다.
@@ -792,7 +792,9 @@
 	</select>
 	```
 ### 게시판 리스트 공통 기능
-1. 공지 숨기기 
+* **화면구현**
+* **기능구현**
+**1. 공지 숨기기** 
       * board.js: 공지 숨기기 클릭시 클래스명에 'blind' 존재 여부 확인해 전체공지와 게시판 공지를 보여주거나 숨깁니다.
       ```java
      	 $("input:checkbox[id='notice_hidden']").click(function(){
@@ -803,7 +805,7 @@
 	})
       ```
 
-2. 목록 개수
+**2. 목록 개수**
       * 한 페이지 목록 개수 변경에 필요한 값을 주소로 전송하고, UriComponents 클래스를 통해 원하는 url을 생성해서 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
 	```java
 	//brdcate.jsp
@@ -820,7 +822,7 @@
 		return uriCom.toUriString();
 	}
 	```
-3. 게시물 번호
+**3. 게시물 번호**
       * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
       * 현재 페이지의 첫 번호(num)=총게시물-((현재 페이지 번호-1) X 현재 목록 개수))
       * 즉, (179개,1page, 10개씩)=>179 부터 시작, (179개,2page, 10개씩)=169 부터 시작
@@ -830,7 +832,7 @@
 		..생략..
 	<c:set var="num" value="${num-1}" />
 	```
-4. 첨부파일 여부, 게시물 날짜, 페이징 기능
+**4. 첨부파일 여부, 게시물 날짜, 페이징 기능**
 	+ 게시물 날짜(board_regtime): ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
    				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)  	
         + 첨부파일 수(fileY): fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
@@ -866,7 +868,7 @@
 		return uriCom.toUriString();
 	}
 	```
-5. 검색
+**5. 검색**
       * 리스트 출력 쿼리 안에 `<include refid="search" />`을 넣어 id가 'search'인 쿼리를 넣어 함께 실행합니다.
       * 검색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
 	```java
@@ -891,6 +893,8 @@
 	```
 
 ### 글쓰기
+* **화면구현**
+* **기능구현**
 **1. 게시판/ 카테고리 목록**
 > 전체/ 인기글에서 '글쓰기' 버튼 클릭시 커뮤니티에 존재하는 모든 게시판 목록을 보여주고 접속된 게시판에서 '글쓰기' 버튼 클릭시 해당 게시판 메뉴의 게시판 목록을 보여줍니다.
 > 게시판 선택 변경시 카테고리 목록이 변경됩니다.
@@ -950,9 +954,7 @@
    	<form role="form" method="post" name="rigForm" id="rigform" 
 			onsubmit="insert(document.rigForm); return false;" enctype="multipart/form-data">
    ```
-   * uploadController
-   	* UUID.randomUUID를 사용해 고유 파일명을 생성합니다. 
-   	* 고유 식별자를 생성하는 이유는 첨부파일 다운로드시 다른 파일과 혼동하지 않게하며 다른 컨텐츠의 임의 접근을 방지합니다.	
+   * uploadController: UUID.randomUUID를 사용해 고유 파일명을 생성합니다. 고유 식별자를 생성하는 이유는 첨부파일 다운로드시 다른 파일과 혼동하지 않게하며 다른 컨텐츠의 임의 접근을 방지합니다.	
    ```java
 	//파일등록 : ajax로 파일 경로생성 및 파일 저장 , DB접속 X
 	@PostMapping(value = "/uploadAws",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -1038,8 +1040,10 @@
    </insert>
    ```
 ### 글 수정
-> 수정을 원하는 글의 작성자와 현재 접속한 유저의 정보가 일치하면 데이터를 가져와 출력하고 다르면 홈페이지 메인으로 이동합니다. (view에 '수정' 버튼 활성화 조건을 이미 제시했지만 잘못된 경로로 접속하는것을 방지하기 위해 작성함)
-   * boardMapper.xml: 
+> 내가 작성한 글 정보를 불러와 수정합니다.
+* **화면구현**
+* **기능구현**
+   * BrdController: 수정을 원하는 글의 작성자와 현재 접속한 유저의 정보가 일치하면 데이터를 가져와 출력하고 다르면 홈페이지 메인으로 이동합니다. (view에 '수정' 버튼 활성화 조건을 이미 제시했지만 잘못된 경로로 접속하는것을 방지하기 위해 작성함)
    ```java
 	//수정페이지 들어가기
 	@RequestMapping(value="/modify",method = RequestMethod.GET)
@@ -1073,6 +1077,8 @@
    ```
 ### 글 삭제
 > 본인이 작성한 글을 삭제할 수 있습니다.
+* **화면구현**
+* **기능구현**
    * BrdController: 삭제시 해당 게시물에 첨부파일이 있으면 먼저 실존 파일을 삭제한 후 글을 삭제합니다.
    ```java
 	//게시물삭제	
@@ -1101,6 +1107,8 @@
 
 ### 답글 쓰기
 > 게시글 테이블에 post_group,post_step,post_indent 컬럼 값을 변경해 답글을 구분합니다.
+* **화면구현**
+* **기능구현**
    * boardMapper.xml: 게시글의 답글은 그룹값에서 step의 최고값+1,indent+1, 답글의 답글은 해당 step, indent+1로 처리합니다.
    ```java
 	<!-- 게시글 답글 등록 -->
@@ -1123,7 +1131,9 @@
 
 ### 게시물 읽기
 > 선택한 게시물의 정보를 보여주며 이전글/다음글, 첨부파일 다운로드, 댓글 CURD 기능이 존재합니다.
-1. 이전글/ 다음글
+* **화면구현**
+* **기능구현**
+**1. 이전글/ 다음글**
    * boardMapper.xml: 현재 게시물과 조건에 맞는 이전글(prev)과 다음글(next) 페이지 번호를 담아 같이 출력합니다.
 	```java
 	<!-- 공지사항 글보기 -->
@@ -1135,7 +1145,7 @@
 	 	on a.prev != b.next where post_idx=#{postId} and rownum = 1 ]]>
 	</select>
 	```
-2. 첨부파일 목록/ 다운로드
+**2. 첨부파일 목록/ 다운로드**
    * UploadController: 첨부된 파일 목록이 표시되며 첨부 파일 클릭시 RESTful로 접속해 다운로드 합니다.
    * 첨부파일 목록  		 
 	```java
@@ -1197,9 +1207,55 @@
 
 ### 댓글기능
 > 각 게시물에 댓글 읽기(리스트), 등록, 수정, 삭제를 RESTful API로 접근 제공합니다.
-     * 댓글리스트
-     * 댓글 등록: POST로 접속된 계정 아이디와 닉네임 값을 가져와 댓글을 등록합니다.
+* **화면구현**
+* **기능구현**
+     **1. 댓글리스트**: 선택한 게시물의 총 댓글을 가져와 페이징 처리해 ModelAndView로 데이터와 이동하고자 하는 view page를 같이 저장한다.
+     (js에서 받아온 데이터를 정리해 댓글 리스트로 출력해줍니다.)
+     ```java
+     	//ReplyController
+	@RequestMapping(value="/list/{nav}/{postId}/{pageNum}" , method = RequestMethod.POST)
+	public ModelAndView replyList(@PathVariable("nav") int nav,@PathVariable("postId") int postId, 
+			@PathVariable("pageNum") int pageNum, ModelAndView mav) {
+		logger.info("댓글리스트");	
+		ResponseEntity<Map<String, Object>> entity = null;
+		try {
+			//한 페이지에 댓글 출력수 vo에 넣기
+			SearchCriteria cri = new SearchCriteria();
+			cri.setPage(pageNum);
+			
+			Map<String,Object> map = new HashMap<>(); 
+			map.put("nav",nav);
+			map.put("postId",postId);
+			map.put("cri",cri);			
+			
+			//페이지번호
+			PageMaker pageMk = new PageMaker();			
+			int count=service.count(map);
+			//게시물 클릭시 맨 마지막 페이지번호로 이동 
+			if(pageNum==0) {
+				int num=(int)(Math.ceil(count/(double)cri.getPageLen()));
+				cri.setPage(num);
+			}
+			pageMk.setCri(cri);
+			pageMk.setTotalCount(count); 	//총개수
+			
+			mav.addObject("replyList", service.listReplyPage(map));			
+			mav.addObject("pageMkRp", pageMk);
+			mav.addObject("replyCnt",pageMk.getTotalCount());
+			mav.addObject("replyPrint",1);		//view구분
+			mav.setViewName("/board/brdnormal");//뷰의 이름
+						
+			entity = new ResponseEntity<Map<String, Object>>(map, HttpStatus.OK);
+		}catch (Exception e) {
+			e.printStackTrace();
+			entity = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		return mav;
+	}
+     ```
+     **2. 댓글 등록**: POST로 전송된 계정 아이디와 닉네임 값을 가져와 입력된 댓글 내용을 등록합니다.
    ```java
+   	//ReplyController
 	@RequestMapping(value="/insert", method = RequestMethod.POST)
 	public ResponseEntity<String> replyInsert(@RequestBody ReplyVO vo){
 		ResponseEntity<String> entity = null;
@@ -1217,8 +1273,9 @@
 		return entity;
 	}
    ```
-   * 댓글 수정
+   **3. 댓글 수정**: PUT(전체값) 또는 PUSH(수정부분만)로 전송된 값으로 수정합니다. 댓글 수정시 등록날짜를 수정된 날짜로 바꿉니다.
    ```java
+  	 //ReplyController
 	@RequestMapping(value="/reply_update",method = { RequestMethod.PUT, RequestMethod.PATCH })
 	public ResponseEntity<String> replyUpdate(@RequestBody ReplyVO vo){
 		ResponseEntity<String> entity = null;
@@ -1232,11 +1289,18 @@
 			entity=new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
 		}
 		return entity;
-
 	}
+	
+	//replyMapper.xml
+	<!-- 댓글수정 -->
+	<update id="updateReply" >
+		<![CDATA[ update reply_${nav} set reply_content=#{rpContent} ,reply_update = sysdate  
+		where reply_idx=#{replyId} and post_idx=#{postId}]]>
+	</update>
    ``` 
-   * 댓글 삭제: 
+   **4. 댓글 삭제**: DELETE로 전송된 댓글정보로 댓글 데이터를 삭제합니다.
    ```java
+   	//ReplyController
 	@RequestMapping(value="/reply_delete",method = RequestMethod.DELETE)
 	public ResponseEntity<String> replyDelete(@RequestBody ReplyVO vo){
 		ResponseEntity<String> entity = null;
@@ -1253,38 +1317,117 @@
    ```
 ### 채팅
 > WebSocket을 사용해 다자간 채팅 기능을 제공합니다.
-* 채팅방 입장 전
-   + 비회원: 로그인/ 회원가입 안내하는 문구와 버튼을 표시합니다.
-   + 회원: 닉네임 입력 후 채팅방 입장이 가능합니다.
-* 채팅방 입장 후
-   + 현재 채팅방에 접속된 인원 수를 표시합니다.
-   + 입장과 퇴장을 알리는 알림문구가 뜹니다.
-   + 나 이외의 유저 채팅글은 왼쪽정렬로 출력해 내 채팅과 구분하여 보여집니다.
-
-
+* **화면구현**
+* **기능구현**
+   *  **채팅방 입장**: 웹소켓을 생성하고 SessionList에 session을 추가합니다. sessionList.size()로 채팅방 접속 인원수를 표시합니다.
+	```java
+	//WebSocketChat
+	// 접속 된 클라이언트 WebSocket session 관리 리스트
+	 private static final List<Session> sessionList=new ArrayList<Session>();
+	//웹소켓생성
+	@OnOpen
+	public void onOpen(Session session) throws IOException {
+		logger.info("연결된 ID : "+session.getId());
+		try {
+			sessionList.add(session);
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+	}
+	//채팅방인원수
+	@PostMapping("/size")
+	public @ResponseBody int listSize()  throws Exception{
+		return sessionList.size();		
+	}
+	```
+   *  **채팅 메세지 전송**
+   	*  '닉네임,메세지,타입'으로 넘어오는 값을 ','을 기준으로 잘라 sendAllSessionToMessage()메소드로 값을 전송합니다.
+   	*  전송된 메세지 타입으로 입장, 퇴장, 유저채팅글 구분해 채팅방에 접속된 모든 사용자들에게 메세지를 보여줍니다.
+	```java
+	//WebSocketChat
+	//메세지 입력
+    	@OnMessage
+   	 public void onMessage(String message,Session session) throws Exception{	    	
+       	 	logger.info("Message From ");
+		try {
+	    		String sender = message.split(",")[0];
+	    		String text = message.split(",")[1];
+	    		String type = message.split(",")[2];  
+			sendAllSessionToMessage(session,sender,text,type);
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}         
+	}
+	//모든 사용자에게 메세지 전송
+	private void sendAllSessionToMessage(Session self, String sender, String text,String type) throws Exception{
+		try {
+			for(Session session:WebSocketChat.sessionList ) {					
+			    if(type.equals("ENTER")){	 
+			    	session.getBasicRemote().sendText("<div class='enter-alarm'>"+sender+"님이 입장하셨습니다.</div>");
+			    }else if(type.equals("LEAVE")){
+			    	session.getBasicRemote().sendText("<div class='enter-alarm'>"+sender+"님이 퇴장하셨습니다.</div>");
+			    }else if(type.equals("CHAT")){			    	
+			    	if(self.getId().equals(session.getId())) {
+			    		session.getBasicRemote().sendText("<div class='_right box'>"
+			    				+ "<div class='msgbox'>"
+			    				+text+"</div><div class='triangle trg_r'></div>"
+			    				+ "<div class='usernick'>"+sender+"</div></div>");	
+			    	}else {
+			    		session.getBasicRemote().sendText("<div class='_left box'>"
+			    				+sender+"<div class='triangle trg_l'></div>"
+			    				+ "<div class='msgbox'>"+text+"</div></div>");
+			    	}	
+			    }
+			}	
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	```
+   *  **채팅방 퇴장**: 채팅방 퇴장시 sessionList안에 존재하는 해당 유저의 session 값을 삭제합니다.
+	```java
+	//WebSocketChat
+	//소켓닫기
+	@OnClose
+	public void onClose(Session session)  throws Exception{	
+		try {
+			logger.info("퇴장 : "+session.getId());
+			sessionList.remove(session);			
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	```
 
 ### 마이페이지
-   1. 회원정보수정
-      + 비밀번호, 닉네임, 이메일, 전화번호, 주소를 수정할 수 있습니다.
-   2. 게시물관리
-      + 내가 쓴 게시물 제목을 확인할 수 있으며 선택 후 삭제 가능합니다.
-   3. 댓글관리
-      + 내가 쓴 댓글 내용을 확인할 수 있으며 선택 후 삭제 가능합니다.
-   4. 회원탈퇴
-      + 탈퇴시 7일 이후 모든 정보가 삭제됩니다.
-      + 그 전까진 계정의 아이디와 이메일, 닉네임을 사용할 수 없습니다. 
+**1. 회원정보수정**
+>비밀번호, 닉네임, 이메일, 전화번호, 주소를 수정할 수 있습니다.
+  * **화면구현**
+  * **기능구현**
+  ```java
+  
+  ```
+**2. 게시물관리**
+  *  내가 쓴 게시물 제목을 확인할 수 있으며 선택 후 삭제 가능합니다.
+**3. 댓글관리**
+  *  내가 쓴 댓글 내용을 확인할 수 있으며 선택 후 삭제 가능합니다.
+**4. 회원탈퇴**
+  *  탈퇴시 7일 이후 모든 정보가 삭제됩니다.
+  *  그 전까진 계정의 아이디와 이메일, 닉네임을 사용할 수 없습니다. 
 
 
 ### 관리자 페이지
-   1. 유저관리
-      + 아이디 또는 닉네임으로 유저를 검색할 수 있습니다.
-      + 총 유저 수, 아이디, 닉네임, 상태(권한), 가입일, 게시글수, 댓글수를 보여줍니다.
-      + 유저를 선택 한 후 유저 상태를 변경할 수 있습니다(활동/ 활동정지)
+**1. 유저관리**
+  *  아이디 또는 닉네임으로 유저를 검색할 수 있습니다.
+  *  총 유저 수, 아이디, 닉네임, 상태(권한), 가입일, 게시글수, 댓글수를 보여줍니다.
+  *  유저를 선택 한 후 유저 상태를 변경할 수 있습니다(활동/ 활동정지)
       
-   2. 메뉴관리
-      + 게시판 메뉴, 게시판, 카테고리를 추가, 수정, 삭제할 수 있습니다.
-      + 게시판 메뉴 삭제시 하위 게시판과 카테고리도 함께 삭제됩니다.
-      + 게시판 삭제시 하위 카테고리도 함께 삭제됩니다.
+**2. 메뉴관리**
+  *  게시판 메뉴, 게시판, 카테고리를 추가, 수정, 삭제할 수 있습니다.
+  *  게시판 메뉴 삭제시 하위 게시판과 카테고리도 함께 삭제됩니다.
+  *  게시판 삭제시 하위 카테고리도 함께 삭제됩니다.
+
+
 ### 기타기능
    * DB에 없는 첨부파일 자동 삭제
       + DB 파일 리스트 데이터와  AWS S3 파일 리스트를 비교해 DB에 없는 파일을 자동으로 삭제합니다.
