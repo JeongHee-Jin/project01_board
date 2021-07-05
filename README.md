@@ -1401,19 +1401,125 @@
 
 ### 마이페이지
 **1. 회원정보수정**
->비밀번호, 닉네임, 이메일, 전화번호, 주소를 수정할 수 있습니다.
+> 비밀번호, 닉네임, 이메일, 전화번호, 주소를 수정할 수 있습니다.
   * **화면구현**
   * **기능구현**
   ```java
-  
+  @PostMapping("/info_modify")
+	public @ResponseBody int infoModify(MemberVO vo) throws Exception{		
+		logger.info("회원정보수정");
+		Map<String,String> map=new HashMap<String,String>();
+		int modify=0;
+		try {			
+			map.put("id",vo.getUserId());
+			if(vo.getUserNickName()!=null) {	//닉네임
+				map.put("nick",vo.getUserNickName());
+			}else if(vo.getUserPw()!=null) {	//비밀번호
+				System.out.println(vo.getUserPw());
+				map.put("pw",vo.getUserPw());
+			}else if(vo.getEmail()!=null) {		//이메일
+				map.put("email",vo.getEmail());
+			}else if(vo.getPhoneNum()!=null) {	//폰번호
+				map.put("phone",vo.getPhoneNum());
+			}else if(vo.getPostCode()!=null) {	//주소
+				map.put("postCode",vo.getPostCode());
+				map.put("roadAddr",vo.getRoadAddr());
+				if(vo.getDetailAddr()!=null) {
+					map.put("detailAddr",vo.getDetailAddr());
+				}
+			}
+			modify=service.infoModify(map);	
+			System.out.println("modify : "+modify);
+	    }catch(Exception e) {
+	    	System.out.println(e.getMessage());
+	    }
+		return modify;		
+	}
   ```
 **2. 게시물관리**
-  *  내가 쓴 게시물 제목을 확인할 수 있으며 선택 후 삭제 가능합니다.
+> 내가 쓴 게시물 제목을 확인할 수 있으며 선택 후 삭제 가능합니다.
+  * **화면구현**
+  * **기능구현**
+  	* MemberController: 
+  ```java
+  	//게시물삭제
+	@PostMapping("/myBoardDelete")
+	public @ResponseBody int myBoardDelete(@RequestParam(value="postIdArr[]") 
+					List<String> postIdArr )throws Exception{
+		logger.info("내 게시물 삭제");
+		int result=0;
+		try {
+			result=service.myBoardDel(postIdArr);    	
+	    }catch(Exception e) {
+	    	System.out.println(e.getMessage());
+	    }
+		return result;
+	}
+	<delete id="myReplyDel" parameterType="java.util.List">
+		delete from reply_20000 
+		<where>
+			reply_idx in 
+			<foreach collection="list" item="item" open="(" close=")" separator=",">
+				 #{item}
+			</foreach>
+		</where>		
+	</delete>
+  ```
 **3. 댓글관리**
-  *  내가 쓴 댓글 내용을 확인할 수 있으며 선택 후 삭제 가능합니다.
+> 내가 쓴 댓글 내용을 확인할 수 있으며 선택 후 삭제 가능합니다.
+  * **화면구현**
+  * **기능구현**
+  ```java
+  	//내가 쓴 댓글 리스트
+	@PostMapping("/myReply")
+	public @ResponseBody ModelAndView myReplyList(Integer page,Model model,
+			SearchCriteria cri) throws Exception {
+		logger.info("내 댓글 보기");
+		ModelAndView mv = new ModelAndView();
+		try {
+			Object principal = SecurityContextHolder.getContext()
+					.getAuthentication().getPrincipal();		
+			UserDetailsVO userDetails = (UserDetailsVO)principal;
+			
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("userId", userDetails.getUserId());	
+			map.put("cri", cri);	
+			model.addAttribute("reply",service.myReply(map));
+	    
+			PageMaker pageMk=new PageMaker();
+			pageMk.setCri(cri);
+			pageMk.setTotalCount(service.myReplyCnt(userDetails.getUserId()));
+			cri.setPage(page);
+			model.addAttribute("pageMk", pageMk);
+
+			mv.setViewName("/member/mypagereply");
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		return mv;
+	}
+  ```
 **4. 회원탈퇴**
-  *  탈퇴시 7일 이후 모든 정보가 삭제됩니다.
-  *  그 전까진 계정의 아이디와 이메일, 닉네임을 사용할 수 없습니다. 
+> 탈퇴시 7일 이후 모든 정보가 삭제됩니다. 그 전까진 계정의 아이디와 이메일, 닉네임을 사용할 수 없습니다. 
+  * **화면구현**
+  * **기능구현**
+  ```java
+  	//회원탈퇴처리
+	@PostMapping(value="/memLeave")
+	public @ResponseBody int memLeave() throws Exception{
+		logger.info("탈퇴처리");
+		int result=0;
+		try {
+			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		    UserDetailsVO userDetails = (UserDetailsVO)principal;			    
+		    String userId=userDetails.getUserId();
+		    result=service.homeLeave(userId);
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return result; 
+	}
+  ```
 
 
 ### 관리자 페이지
