@@ -792,7 +792,7 @@
 	</select>
 	```
 ### 게시판 리스트 공통 기능
-   1. 공지 숨기기 
+1. 공지 숨기기 
       * board.js: 공지 숨기기 클릭시 클래스명에 'blind' 존재 여부 확인해 전체공지와 게시판 공지를 보여주거나 숨깁니다.
       ```java
      	 $("input:checkbox[id='notice_hidden']").click(function(){
@@ -803,7 +803,7 @@
 	})
       ```
 
-   2. 목록 개수
+2. 목록 개수
       * 한 페이지 목록 개수 변경에 필요한 값을 주소로 전송하고, UriComponents 클래스를 통해 원하는 url을 생성해서 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
 	```java
 	//brdcate.jsp
@@ -820,7 +820,7 @@
 		return uriCom.toUriString();
 	}
 	```
-   3. 게시물 번호
+3. 게시물 번호
       * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
       * 현재 페이지의 첫 번호(num)=총게시물-((현재 페이지 번호-1) X 현재 목록 개수))
       * 즉, (179개,1page, 10개씩)=>179 부터 시작, (179개,2page, 10개씩)=169 부터 시작
@@ -830,18 +830,18 @@
 		..생략..
 	<c:set var="num" value="${num-1}" />
 	```
-   4. 첨부파일 여부, 게시물 날짜, 페이징 기능
+4. 첨부파일 여부, 게시물 날짜, 페이징 기능
 	+ 게시물 날짜(board_regtime): ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
    				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)  	
         + 첨부파일 수(fileY): fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
 	+ 댓글 수(reply_cnt): 현재 게시물 번호와 일치하는 댓글 수를 가져와 1개 이상이면 제목 옆에 개수 표시를 합니다.
-	+ 답글 기능: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.  
-	+ 페이징: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 게시물<= 현재페이지x보여줄게시물수 and 게시물번호가 0이상인 조건에 만족하는 게시물 중에  
-		`rn > (#{cri.page} -1) * #{cri.pageLen}` 
+	+ 답글 기능: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.(부모글번호=group, 답글=step+1, 답글의 답글=indent+1) 
+	+ 페이징: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 해당 페이지까지의 게시물을 설정하고  
+		`rn > (#{cri.page} -1) * #{cri.pageLen}` 해당 페이지에 보여줄 게시물수를 설정한다. 즉, '3페이지 10개씩' 이면 rownum컬럼 순으로 30개로 자른 다음
+		10개씩 잘라 세번째 부분부터 출력된다.		 
 	```java
 	<select id="cmuTotalSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
-		 <![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname, 
-			b.post_notice, b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
+		 <![CDATA[select 생략, 
 			DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
 			,TO_CHAR(b.post_regtime,'YY.MM.DD')) board_regtime, 
 	        	(select count(*) from board_attach_20000 ba where ba.post_idx=b.post_idx)as fileY 	        
@@ -857,18 +857,24 @@
 	        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
      </select>
 	```
-   7. 페이징
-      * 한 페이지의 목록 출력 개수 초과시 다음 페이지 번호를 생성해 다음글을 볼 수 있습니다.
-      * 페이지 10개 초과 시 다음> 버튼 생성, 현재 페이지가 11 이상이면 <이전 버튼 생성
-	
-
-   8. 검색
+	```java
+	//페이지수(게시판 기본형:검색X)
+	public String makeQuery(int page) {
+		UriComponents uriCom = UriComponentsBuilder.newInstance()
+				.queryParam("page", page)
+				.queryParam("pageLen", cri.getPageLen()).build();
+		return uriCom.toUriString();
+	}
+	```
+5. 검색
       * 리스트 출력 쿼리 안에 `<include refid="search" />`을 넣어 id가 'search'인 쿼리를 넣어 함께 실행합니다.
       * 검색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
 	```java
-	...
-	<include refid="search" />
-	...
+	<select> //출력쿼리문
+		...
+		<include refid="search" />
+		...
+	</select>
 	<!-- 검색 타입으로 추가 -->
 	<sql id="search">
 		<if test="cri.searchType != null">
@@ -887,8 +893,7 @@
 ### 글쓰기
 **1. 게시판/ 카테고리 목록**
 > 전체/ 인기글에서 '글쓰기' 버튼 클릭시 커뮤니티에 존재하는 모든 게시판 목록을 보여주고 접속된 게시판에서 '글쓰기' 버튼 클릭시 해당 게시판 메뉴의 게시판 목록을 보여줍니다.
-> 게시판 선택은 필수이고 카테고리는 선택사항 입니다.
-> 게시판 선택 시 해당 게시판의 카테고리를 출력합니다.
+> 게시판 선택 변경시 카테고리 목록이 변경됩니다.
   * brdController: 글쓰기 페이지 접속시 해당 게시판 메뉴의 게시판 목록과 카테고리를 불러옵니다. 다른 게시판으로 변경시 카테고리 목록도 변경됩니다.
 	```java
 	//글쓰기페이지출력
@@ -907,7 +912,7 @@
 			System.out.println(e.getMessage());
 		}
 	}
-	//게시판 말머리출력
+	//게시판 카테고리 출력
 	@RequestMapping(value="/catelist",method=RequestMethod.POST)	
 	public @ResponseBody List<Map<String,Object>> brdNav(
 			@ModelAttribute("mid")String mid, Model model) throws Exception{
@@ -939,7 +944,12 @@
    
 **3. 파일첨부**
 > 첨부 아이콘 클릭 시 내 컴퓨터 내에 존재하는 파일 2MB이하, 확장자 .exe,.sh,.alz를 제외한 파일을 첨부할 수 있습니다.
-> 첨부한 파일은 Amazon S3에 저장되지만 글쓰기 완료 전까진 DB에는 저장되지 않습니다.
+> 첨부한 파일은 저장 경로와 고유 식별자를 생성한 후 처리합니다. 파일 등록시 Amazon S3에 바로 저장되지만 글쓰기 완료 전까진 DB에는 저장되지 않습니다.
+   * regiter.jsp: `enctype="multipart/form-data"` 설정을 해주면 파일을 한번에 여러개 등록할 수 있습니다.
+   ```java
+   	<form role="form" method="post" name="rigForm" id="rigform" 
+			onsubmit="insert(document.rigForm); return false;" enctype="multipart/form-data">
+   ```
    * uploadController
    	* UUID.randomUUID를 사용해 고유 파일명을 생성합니다. 
    	* 고유 식별자를 생성하는 이유는 첨부파일 다운로드시 다른 파일과 혼동하지 않게하며 다른 컨텐츠의 임의 접근을 방지합니다.	
@@ -1028,8 +1038,7 @@
    </insert>
    ```
 ### 글 수정
-> 수정을 원하는 글의 작성자와 현재 접속한 유저의 정보가 일치하면 공지글 체크여부, 게시판, 카테고리, 제목과 내용, 첨부파일 데이터를 가져와 출력하고 
-> 다르면 홈페이지 메인으로 이동합니다. (view에 '수정' 버튼 활성화 조건을 이미 제시했지만 잘못된 경로로 접속하는것을 방지하기 위해 작성함)
+> 수정을 원하는 글의 작성자와 현재 접속한 유저의 정보가 일치하면 데이터를 가져와 출력하고 다르면 홈페이지 메인으로 이동합니다. (view에 '수정' 버튼 활성화 조건을 이미 제시했지만 잘못된 경로로 접속하는것을 방지하기 위해 작성함)
    * boardMapper.xml: 
    ```java
 	//수정페이지 들어가기
@@ -1063,34 +1072,185 @@
 	}
    ```
 ### 글 삭제
-> 수정을 원하는 글의 공지글 체크여부, 게시판, 카테고리, 제목과 내용, 첨부파일이 표시됩니다.
-   * boardMapper.xml: 
+> 본인이 작성한 글을 삭제할 수 있습니다.
+   * BrdController: 삭제시 해당 게시물에 첨부파일이 있으면 먼저 실존 파일을 삭제한 후 글을 삭제합니다.
    ```java
-	
+	//게시물삭제	
+	@RequestMapping(value="/remove", method=RequestMethod.POST)
+	@ResponseBody
+	public void remove(BrdVO vo,HttpServletRequest request) throws Exception{
+		logger.info("게시물 삭제 처리");
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("nav",vo.getNav());
+		map.put("postId",vo.getPostId());
+		try {
+			List<BoardAttachVO> attachList = service.getAttachList(map);
+			if(attachList!=null && attachList.size()>0) {
+				attachList.forEach(attach->{
+					String fileName=attach.getFileId()+"_"+attach.getFileName();
+					awsS3=AwsS3.getInstance();
+					awsS3.delete(attach.getUploadPath(),fileName);
+				});
+			}		
+			service.remove(vo);
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}		
+	}	
    ```
-   * boardAttachMapper.xml: 첨부한 파일의 정보(파일식별자, 경로, 파일이름, 게시물번호)를 DB에 등록합니다. 
-   ```java
 
-   ```
 ### 답글 쓰기
-> 공지글 체크가 표시되지 않아 공지글로 등록할 수 없습니다.
-> 게시판을 바꿔서 작성할 순 없지만 카테고리는 수정 가능합니다.
+> 게시글 테이블에 post_group,post_step,post_indent 컬럼 값을 변경해 답글을 구분합니다.
+   * boardMapper.xml: 게시글의 답글은 그룹값에서 step의 최고값+1,indent+1, 답글의 답글은 해당 step, indent+1로 처리합니다.
+   ```java
+	<!-- 게시글 답글 등록 -->
+	<insert id="commentaireStep" parameterType="BrdVO">
+		..생략..
+		insert into board_post_${nav}
+			(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_group,post_step,post_indent)
+		values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+			#{title},#{content},#{memId},#{memNickName},#{group},(select max(post_step)+1 from board_post_${nav} where post_group=#{group}),#{indent}+1)
+	</insert>
+		
+	<insert id="commentaireIndent" parameterType="BrdVO">
+		..생략..
+		insert into board_post_${nav}
+			(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_group,post_step,post_indent)
+		values(board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+			#{title},#{content},#{memId},#{memNickName},#{group},#{step},(select max(post_indent)+1 from board_post_${nav} where post_step=#{step}))
+	</insert>	
+   ```
 
+### 게시물 읽기
+> 선택한 게시물의 정보를 보여주며 이전글/다음글, 첨부파일 다운로드, 댓글 CURD 기능이 존재합니다.
+1. 이전글/ 다음글
+   * boardMapper.xml: 현재 게시물과 조건에 맞는 이전글(prev)과 다음글(next) 페이지 번호를 담아 같이 출력합니다.
+	```java
+	<!-- 공지사항 글보기 -->
+	<select id="readNoticePage" resultMap="boardMap" resultType="BrdVO">
+	<![CDATA[
+		select bp.* ,prev,next from board_post_${nav} bp,
+		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} ORDER BY post_idx ASC ) a full outer join 
+		(SELECT post_idx next FROM board_post_${nav} WHERE post_idx < #{postId} ORDER BY post_idx desc) b 
+	 	on a.prev != b.next where post_idx=#{postId} and rownum = 1 ]]>
+	</select>
+	```
+2. 첨부파일 목록/ 다운로드
+   * UploadController: 첨부된 파일 목록이 표시되며 첨부 파일 클릭시 RESTful로 접속해 다운로드 합니다.
+   * 첨부파일 목록  		 
+	```java
+	//UploadController
+	//첨부파일 불러오기 : 게시물 번호를 받아 첨부파일 데이터를 json으로 반환
+	@GetMapping("/getAttachList")	
+	public @ResponseBody ResponseEntity<List<BoardAttachVO>> loadFile(String nav,String postId) throws Exception{
+		logger.info("loadFile");
+		Map<String,Object> map=new HashMap<String,Object>();
+		List<BoardAttachVO> list = new ArrayList<>();
+		try {
+			map.put("nav",nav);
+			map.put("postId",postId);		
+			list=fileDAO.getAttachList(map);
+		}catch(UnsupportedEncodingException e){
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(list,HttpStatus.OK);
+	}
+	```
+   * 첨부파일 다운로드
+	* aws s3에 있는 파일에 접속하기 위해서 파일 위치 url클래스 객체 생성 후 url.openConnection()로 URLConnection 추상클래스 객체를 생성한다.
+	* 프로토콜에 맞춰 하위 클래스의 인스턴스를 얻고(HttpURLConnection) InputStream으로 값을 반환 시킵니다.
+	* HttpHeaders에 'user-Agent'로 접속한 웹브라우저에 따라 파일 이름 인코딩을 한 후 HttpHeader에 파일이름과 경로를 넣어 다운로드 가능하게 합니다. 
+   ```java
+	//첨부파일 다운로드
+	@GetMapping(value="/download" ,produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	public @ResponseBody ResponseEntity<byte[]> getFile(@RequestHeader(value="User-Agent")String userAgent,String path,String fileName){
+		logger.info("fileName: "+ fileName);
+		ResponseEntity<byte[]> result = null;
+		  try {
+			  HttpHeaders header = new HttpHeaders();
+			  URL url = new URL(awsS3.getFileURL(path,fileName));
+			  HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+			  InputStream fileIS = urlConn.getInputStream();
+			  String rscOriginalName = fileName.substring(fileName.indexOf("_")+1);
+			  String downloadName = null;
+			  if(userAgent.contains("Trident")) {
+					logger.info("IE browser");
+					downloadName = URLEncoder.encode(rscOriginalName, "UTF-8").replaceAll("\\+", " ");
+					logger.info("Edge name: " + downloadName);
+				}else if(userAgent.contains("Edge")) {
+					logger.info("Edge browser");
+					downloadName = new String(rscOriginalName.getBytes("UTF-8"));
+				}else {
+					logger.info("Chrome browser");
+					downloadName = new String(rscOriginalName.getBytes("UTF-8"), "ISO-8859-1");
+				}		  
+			header.add("Content-Disposition", "attachment; filename=" + downloadName);
+		    header.add("Content-Type", URLConnection.guessContentTypeFromStream(fileIS));
+		    result = new ResponseEntity<>(IOUtils.toByteArray(fileIS), header, HttpStatus.OK);
+		  
+		  } catch(IOException e) {
+			 logger.info("wrong file path");
+		  }
+		  return result;
+	}
+   ```
 
-#### 게시물 페이지
-   1. 이전글/ 다음글
-      * 현재 게시판 내 이전글과 다음글로 이동합니다.
-      
-   2. URL복사
-      * 해당 게시물의 주소가 복사됩니다.
-
-   3. 첨부파일 목록/ 다운로드
-      * 첨부된 파일 목록이 표시되며 클릭시 다운로드 됩니다.
-
-   4. 게시물 댓글 목록
-      * 해당 게시물의 총 댓글수가 표시되며 내가 쓴 게시물
 ### 댓글기능
+> 각 게시물에 댓글 읽기(리스트), 등록, 수정, 삭제를 RESTful API로 접근 제공합니다.
+     * 댓글리스트
+     * 댓글 등록: POST로 접속된 계정 아이디와 닉네임 값을 가져와 댓글을 등록합니다.
+   ```java
+	@RequestMapping(value="/insert", method = RequestMethod.POST)
+	public ResponseEntity<String> replyInsert(@RequestBody ReplyVO vo){
+		ResponseEntity<String> entity = null;
+		logger.info("댓글쓰기");		
+		try {
+			UserDetailsVO user=(UserDetailsVO)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			vo.setMemId(user.getUserId());
+			vo.setMemNickName(user.getUserNickName());
+			service.replyInsert(vo);
+			entity = new ResponseEntity<String>("success",HttpStatus.OK);
+		}catch (Exception e) {
+			e.printStackTrace();
+			entity=new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		}
+		return entity;
+	}
+   ```
+   * 댓글 수정
+   ```java
+	@RequestMapping(value="/reply_update",method = { RequestMethod.PUT, RequestMethod.PATCH })
+	public ResponseEntity<String> replyUpdate(@RequestBody ReplyVO vo){
+		ResponseEntity<String> entity = null;
+		logger.info("댓글수정");	
+		//String userId = (String) session.getAttribute("userId");
+		try {
+			service.replyUpdate(vo);
+			entity = new ResponseEntity<String>("success",HttpStatus.OK);
+		}catch (Exception e) {
+			e.printStackTrace();
+			entity=new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+		return entity;
 
+	}
+   ``` 
+   * 댓글 삭제: 
+   ```java
+	@RequestMapping(value="/reply_delete",method = RequestMethod.DELETE)
+	public ResponseEntity<String> replyDelete(@RequestBody ReplyVO vo){
+		ResponseEntity<String> entity = null;
+		logger.info("삭제");
+		try {
+			service.replyDelete(vo);
+			entity = new ResponseEntity<String>("success",HttpStatus.OK);
+		}catch (Exception e) {
+			e.printStackTrace();
+			entity=new ResponseEntity<String>(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
+		return entity;
+	}
+   ```
 ### 채팅
 > WebSocket을 사용해 다자간 채팅 기능을 제공합니다.
 * 채팅방 입장 전
