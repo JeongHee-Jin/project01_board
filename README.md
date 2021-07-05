@@ -211,7 +211,7 @@
 > 인증코드 생성후 입력한 이메일로 인증코드를 전송해 인증 확인합니다.
   * **화면기능**
   * **기능구현**
- 	 * MemberService: 코드생성 및 이메일 전송을 합니다.
+ 	 * MemberService: 코드생성 후 이메일을 전송합니다.
 	```java
 	//이메일코드생성
 	@Override
@@ -249,8 +249,9 @@
 		}		
 	}
 	```
-	 * root-context.xml: localhost로 실행할 땐 구글 아이디/ 비밀번호 입력으로 이메일이 보내지지만 aws 서비스시 보안 문제로 메일 전송이 안되므로 계정 ```2차 인증을 한 후 
-	 2차 비밀번호```를 적어야 합니다.
+	 * root-context.xml: localhost로 실행할 땐 구글 아이디/ 비밀번호로 이메일 전송이 가능하지만 aws 서비스시 보안 문제로 메일 전송이 안되므로 계정  
+	 ```2차 인증을 한 후 2차 비밀번호```를 적어야 합니다.
+	 
 	 ```java
 	 <!-- 메일 보내기 (SEND) -->
 	   <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
@@ -279,7 +280,7 @@
 > 입력된 회원 정보중 비밀번호는 암호화 처리를 한 후 DB에 저장해 회원가입을 완료합니다.
   * **화면기능**
   * **기능구현**
- 	 * MemberController: form 안에 입력된 정보를 MemberVO로 받아옵니다.
+ 	 * MemberController: form 안에 입력된 정보를 MemberVO로 받아와 등록에 성공하면 'success'를 전송해 가입 축하 메세지를 보여줍니다.
    	```java
 	/회원가입POST
 	@PostMapping(value="/join", produces = "text/html; charset=utf8")
@@ -347,7 +348,7 @@
 			onsubmit="login(document.loginForm); return false;" >
 	```
 	
-   	* security-context.xml
+   	* security-context.xml: 받아올 파라미터 name명과 로그인 인증, 성공, 실패, 로그아웃 경로 등을 설정합니다.
 	```java
 	<!-- 로그인:  로그인 인증, 성공, 실패 처리 작업-->
 		<security:form-login 
@@ -659,7 +660,7 @@
 	
 	* boardMapper.xml
 	 	* 공지 페이지는 답글기능이 없어 group(게시물번호)값을 넣지 않습니다.(selectkey에 대한 설명은 아래 글쓰기에 적혀있음)
-	 	* 공지글 여부 컬럼 post_notice: 'T'=전체공지, 'Y'=게시판공지, 'N'= 
+	 	* 공지글 여부 컬럼 post_notice: 'T'=전체공지, 'Y'=게시판공지, 'N'= 일반글 
 	```java
 	<!-- register : 글쓰기 (공지,커뮤니티)-->
 	<insert id="createCmuPage" parameterType="BrdVO">
@@ -736,9 +737,6 @@
 > 전체는 커뮤니티에 존재하는 모든 글을 보여주며, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
   * boardMapper.xml
   	* 전체공지: 공지테이블(board_post_10000)에 공지여부(post_notice) 컬럼 값이 'T'인 게시물을 가져온다.
-   	* board_regtime column: ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 시간으로 표시, 아니면 'YYYY.MM.DD' 날짜로 표시됩니다.
-   				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)
-	* fileY column: 각 리스트의 파일 수를 가져와 0 초과면 파일첨부 아이콘이 표시됩니다.
 	* 인기글: ```post_hit>=50 or reply_cnt>=50``` 조건으로 인기글 목록을 출력합니다.
 	
 	```java
@@ -749,34 +747,21 @@
 	</select>
 	<!-- 게시판 : hot -->
 	<select id="cmuHotSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
-	<![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
-        b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
-		DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
-        ,TO_CHAR(b.post_regtime,'YY.MM.DD')) board_regtime,
-        (select count(*) from board_attach_20000 ba where ba.post_idx=b.post_idx)as fileY 
-		from(
-			select a.* from(
-				select  ROWNUM rn, p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
-					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
-				from board_post_${nav} bp where post_notice='N'
-			order by post_group DESC, post_step ASC,post_indent ASC) p where 1=1]]>
-		<include refid="search" />
-        	<![CDATA[ order by rn ASC) a
+	<![CDATA[select 생략 from( 생략 ) a
        	 	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0 and post_hit>=50 or reply_cnt>=50) b , board_list c
        	 where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
 	</select>
 	```
 	
 **2. 게시판/ 카테고리**
-> 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다.
+> 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다. 
   *  boardMapper.xml  
 	+ 게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.  
-   	+ 답글 기능: ```order by post_group DESC, post_step ASC,post_indent ASC```으로 답글을 정렬합니다.  
-   	+ 게시판: ```brd_idx=${mid}``` 선택한 게시판에 ```b.cate_idx=d.cate_idx(+)``` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.
+   	+ 게시판: `brd_idx=${mid}` 선택한 게시판에 `b.cate_idx=d.cate_idx(+)` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.
    		[이미지넣기]  
-   	+ 카테고리:``` cate_idx=${sub}``` 선택한 카테고리와 ```b.cate_idx=d.cate_idx``` 동일한 카테고리 게시물을 출력합니다.  
+   	+ 카테고리: `cate_idx=${sub}` 선택한 카테고리와 `b.cate_idx=d.cate_idx` 동일한 카테고리 게시물을 출력합니다.  
 	
-```java
+	```java
 	<!-- 게시판별 공지 -->
 	<select id="noticeListBoard" resultType="BrdVO" resultMap="boardMap">
 		<![CDATA[select bp.*,bc.cate_name,(select count(*) from board_attach_20000 ba where ba.post_idx(+)=bp.post_idx)as fileY 
@@ -787,10 +772,7 @@
 	<select id="cmuBoardSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 	<![CDATA[select 생략 from(
 			select a.* from(
-				select rownum rn,p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
-					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
-					from board_post_${nav} bp 
-					where post_notice='N' order by post_group DESC, post_step ASC,post_indent ASC) p 
+				select rownum rn,p.* from( 생략 ) p 
 				where brd_idx=${mid}]]>
 			<include refid="search" />
 			<![CDATA[order by rn ASC ) a
@@ -801,46 +783,106 @@
 	<select id="cmuCateSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 	<![CDATA[select 생략 from(
 			select ROW_NUMBER() OVER(ORDER BY rn desc) as pno, a.* from(
-				select rownum rn,p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
-					select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
-					from board_post_${nav} bp 
-					where post_notice='N' order by post_group DESC, post_step ASC,post_indent ASC) p 
+				select rownum rn,p.* from( 생략 ) p 
 				where cate_idx=${sub}]]>
 			<include refid="search" />
 			<![CDATA[order by rn ASC ) a
         		where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0  ) b ,brd_category d 
        		where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx order by pno desc]]>
 	</select>
-```
+	```
 ### 게시판 리스트 공통 기능
    1. 공지 숨기기 
-      * 전체공지와 게시판의 공지를 숨길 수 있습니다.
+      * board.js: 공지 숨기기 클릭시 클래스명에 'blind' 존재 여부 확인해 전체공지와 게시판 공지를 보여주거나 숨깁니다.
       ```java
-      
+     	 $("input:checkbox[id='notice_hidden']").click(function(){
+		var noticeChk = document.getElementsByClassName("noticeChk");
+		for(var i=0;i<noticeChk.length;i++){
+			noticeChk[i].classList.toggle('blind');
+		}
+	})
       ```
 
    2. 목록 개수
-      * 페이지에 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
-
+      * 한 페이지 목록 개수 변경에 필요한 값을 주소로 전송하고, UriComponents 클래스를 통해 원하는 url을 생성해서 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
+	```java
+	//brdcate.jsp
+	<c:when test="${empty sub}">
+		<li onClick="location.href='${pageMk.makeQueryLen(mid,5)}'">5개씩</li>
+		..생략..
+ 	</c:when>
+	//PageMaker: 보여줄 게시물수(게시판)
+	public String makeQueryLen(int mid,int pageLen) {
+		UriComponents uriCom = UriComponentsBuilder.newInstance()
+				.queryParam("mid", mid)
+				.queryParam("page", 1)
+				.queryParam("pageLen", pageLen).build();
+		return uriCom.toUriString();
+	}
+	```
    3. 게시물 번호
       * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
-
-   4. 댓글 개수 
-      * 시물 댓글 수가 1개 이상일 때 제목 옆에 표시됩니다.
-
-   5. 답글 구분
-      * └RE: 표시로 답글 게시물을 구분할 수 있습니다.
-
-   6. 게시물 날짜
-      * 당일 올린 게시물은 올린 시간으로 표시되며 다음날이 되면 날짜로 보여줍니다.
-
+      * 현재 페이지의 첫 번호(num)=총게시물-((현재 페이지 번호-1) X 현재 목록 개수))
+      * 즉, (179개,1page, 10개씩)=>179 부터 시작, (179개,2page, 10개씩)=169 부터 시작
+      * 리스트 하나 출력시 ${num-1} 값을 -1씩 해주면서 출력한다.(179,178,176...)
+	```java
+	<c:set var="num" value="${pageMk.totalCount-((pageMk.cri.page-1)*pageMk.cri.pageLen) }" />
+		..생략..
+	<c:set var="num" value="${num-1}" />
+	```
+   4. 첨부파일 여부, 게시물 날짜, 페이징 기능
+	+ 게시물 날짜(board_regtime): ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
+   				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)  	
+        + 첨부파일 수(fileY): fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
+	+ 댓글 수(reply_cnt): 현재 게시물 번호와 일치하는 댓글 수를 가져와 1개 이상이면 제목 옆에 개수 표시를 합니다.
+	+ 답글 기능: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.  
+	+ 페이징: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 게시물<= 현재페이지x보여줄게시물수 and 게시물번호가 0이상인 조건에 만족하는 게시물 중에  
+		`rn > (#{cri.page} -1) * #{cri.pageLen}` 
+	```java
+	<select id="cmuTotalSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+		 <![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname, 
+			b.post_notice, b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
+			DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
+			,TO_CHAR(b.post_regtime,'YY.MM.DD')) board_regtime, 
+	        	(select count(*) from board_attach_20000 ba where ba.post_idx=b.post_idx)as fileY 	        
+			from(
+				select a.* from(
+					select  ROWNUM rn, p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
+						select bp.* ,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+						from board_post_${nav} bp where post_notice='N' 
+					order by post_group DESC, post_step ASC,post_indent ASC) p where 1=1]]>
+				<include refid="search" />
+	       	 	<![CDATA[ order by rn ASC) a 
+	        	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0) b , board_list c
+	        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
+     </select>
+	```
    7. 페이징
       * 한 페이지의 목록 출력 개수 초과시 다음 페이지 번호를 생성해 다음글을 볼 수 있습니다.
-      * 이지 10개 초과 시 다음> 버튼 생성, 현재 페이지가 11 이상이면 <이전 버튼 생성
+      * 페이지 10개 초과 시 다음> 버튼 생성, 현재 페이지가 11 이상이면 <이전 버튼 생성
+	
 
    8. 검색
-      * 색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
-
+      * 리스트 출력 쿼리 안에 `<include refid="search" />`을 넣어 id가 'search'인 쿼리를 넣어 함께 실행합니다.
+      * 검색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
+	```java
+	...
+	<include refid="search" />
+	...
+	<!-- 검색 타입으로 추가 -->
+	<sql id="search">
+		<if test="cri.searchType != null">
+			<if test="cri.searchType == 'bcaN'.toString()"> and bca_id like '%'||#{cri.keyword}||'%' </if>
+			<!-- 제목+내용 -->
+			<if test="cri.searchType == 'tc'.toString()"> and (post_title like '%'||#{cri.keyword}||'%' 
+				or post_content like '%'||#{cri.keyword}||'%')</if>
+			<!-- 제목 -->
+			<if test="cri.searchType == 't'.toString()"> and post_title like '%'||#{cri.keyword}||'%' </if>
+			<!-- 글작성자 -->
+			<if test="cri.searchType == 'w'.toString()"> and mem_nickname like '%'||#{cri.keyword}||'%' </if>
+		</if>
+	</sql>
+	```
 
 ### 글쓰기
 **1. 게시판/ 카테고리 목록**
@@ -1019,33 +1061,12 @@
 		}
 		return "board/modify";
 	}
-	
-	//수정완료처리
-	@RequestMapping(value="/modify",method = RequestMethod.POST)
-	public String modifyPOST(@ModelAttribute("vo")BrdVO vo,Model model) throws Exception{
-		logger.info("게시물 수정 처리");
-		String str="redirect:/cmu/brd";
-		try {
-			model.addAttribute("nav",vo.getNav());
-			model.addAttribute("mid",vo.getBrdId());
-			if(vo.getNotice()==null) {vo.setNotice("N");}
-			service.modify(vo);			
-			if(vo.getNav().equals(10000)) {
-				str= "redirect:/notice";
-			}else {
-				str= "redirect:/cmu/brd";
-			}			
-		}catch(Exception e) {
-			System.out.println(e.getMessage());
-		}		
-		return str;		
-	}
    ```
 ### 글 삭제
 > 수정을 원하는 글의 공지글 체크여부, 게시판, 카테고리, 제목과 내용, 첨부파일이 표시됩니다.
    * boardMapper.xml: 
    ```java
-
+	
    ```
    * boardAttachMapper.xml: 첨부한 파일의 정보(파일식별자, 경로, 파일이름, 게시물번호)를 DB에 등록합니다. 
    ```java
