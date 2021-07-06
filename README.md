@@ -673,6 +673,7 @@
 		#{title},#{content},#{memId},#{memNickName},#{notice})
 	</insert>
 	```
+---
 	
 ### 커뮤니티
 * **사용자별 권한**  
@@ -789,6 +790,8 @@
        		where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx order by pno desc]]>
 	</select>
 	```
+---
+
 ### 게시판 리스트 공통 기능
 * **화면구현**
 * **기능구현**
@@ -832,13 +835,13 @@
 	<c:set var="num" value="${num-1}" />
 ```
 
-**4. 첨부파일 여부, 게시물 날짜, 페이징 기능**
-  *  게시물 날짜(board_regtime): ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
+**4. 게시물 날짜, 첨부파일 여부, 답글 정렬, 페이징 기능**
+  * **게시물 날짜(board_regtime)**: ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
    				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)  	
-  * 첨부파일 수(fileY): fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
-  *  댓글 수(reply_cnt): 현재 게시물 번호와 일치하는 댓글 수를 가져와 1개 이상이면 제목 옆에 개수 표시를 합니다.
-  *  답글 기능: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.(부모글번호=group, 답글=step+1, 답글의 답글=indent+1) 
-  * 페이징: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 해당 페이지까지의 게시물을 설정하고  
+  * **첨부파일 여부(fileY)**: fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
+  * **댓글 수(reply_cnt)**: 현재 게시물 번호와 일치하는 댓글 수를 가져와 1개 이상이면 제목 옆에 개수 표시를 합니다.
+  * **답글 정렬**: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.(부모글번호=group, 답글=step+1, 답글의 답글=indent+1) 
+  * **페이징**: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 해당 페이지까지의 게시물을 설정하고  
 		`rn > (#{cri.page} -1) * #{cri.pageLen}` 해당 페이지에 보여줄 게시물수를 설정한다. 즉, '3페이지 10개씩' 이면 rownum컬럼 순으로 30개로 자른 다음
 		10개씩 잘라 세번째 부분부터 출력된다.		 
 	```java
@@ -891,6 +894,7 @@
 		</if>
 	</sql>
 	```
+---
 
 ### 글쓰기
 * **화면구현**
@@ -1038,6 +1042,8 @@
 	values(#{fileId},#{uploadPath},#{fileName},#{postId})
    </insert>
    ```
+---
+   
 ### 글 수정
 > 내가 작성한 글 정보를 불러와 수정합니다.
 * **화면구현**
@@ -1074,6 +1080,8 @@
 		return "board/modify";
 	}
    ```
+---  
+   
 ### 글 삭제
 > 본인이 작성한 글을 삭제할 수 있습니다.
 * **화면구현**
@@ -1103,20 +1111,24 @@
 		}		
 	}	
    ```
+---
 
 ### 답글 쓰기
-> 게시글 테이블에 post_group,post_step,post_indent 컬럼 값을 변경해 답글을 구분합니다.
+> 게시글 테이블에 post_group, post_step, post_indent 컬럼 값을 변경해 답글을 구분합니다.
 * **화면구현**
 * **기능구현**
-   * boardMapper.xml: 게시글의 답글은 그룹값에서 step의 최고값+1,indent+1, 답글의 답글은 해당 step, indent+1로 처리합니다.
+   * 게시글의 답글: post_group이 동일한 데이터 중 step의 최고값+1, indent+1
+   * 답글의 답글: step이 동일한 데이터 중 indent의 최고값+1로 처리합니다.
    ```java
+   <!-- boardMapper.xml-->
 	<!-- 게시글 답글 등록 -->
 	<insert id="commentaireStep" parameterType="BrdVO">
 		..생략..
 		insert into board_post_${nav}
 			(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_group,post_step,post_indent)
 		values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
-			#{title},#{content},#{memId},#{memNickName},#{group},(select max(post_step)+1 from board_post_${nav} where post_group=#{group}),#{indent}+1)
+			#{title},#{content},#{memId},#{memNickName},#{group},
+			(select max(post_step)+1 from board_post_${nav} where post_group=#{group}),#{indent}+1)
 	</insert>
 		
 	<insert id="commentaireIndent" parameterType="BrdVO">
@@ -1124,9 +1136,11 @@
 		insert into board_post_${nav}
 			(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_group,post_step,post_indent)
 		values(board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
-			#{title},#{content},#{memId},#{memNickName},#{group},#{step},(select max(post_indent)+1 from board_post_${nav} where post_step=#{step}))
+			#{title},#{content},#{memId},#{memNickName},#{group},#{step},
+			(select max(post_indent)+1 from board_post_${nav} where post_group=#{group} and post_step=#{step}))
 	</insert>	
    ```
+---
 
 ### 게시물 읽기
 > 선택한 게시물의 정보를 보여주며 이전글/다음글, 첨부파일 다운로드, 댓글 CURD 기능이 존재합니다.
@@ -1204,6 +1218,7 @@
 		  return result;
 	}
 ```
+---
 
 ### 댓글기능
 > 각 게시물에 댓글 읽기(리스트), 등록, 수정, 삭제를 RESTful API로 접근 제공합니다.
@@ -1314,6 +1329,8 @@
 		return entity;
 	}
    ```
+---
+
 ### 채팅
 > WebSocket을 사용해 다자간 채팅 기능을 제공합니다.
 * **화면구현**
@@ -1397,12 +1414,15 @@
 		}
 	}
 	```
+---
 
 ### 마이페이지
+> 마이페이지 내에 기능을 사용하려면 비밀번호를 한번 더 입력해야합니다. ModelAndView로 값과 주소를 전달하기 때문에 새로고침시 마이페이지로 이동합니다.
 **1. 회원정보수정**
 > 비밀번호, 닉네임, 이메일, 전화번호, 주소를 수정할 수 있습니다.
   * **화면구현**
   * **기능구현**
+  	* MemberController: 정보 수정을 각각 따로 받아 처리하기 위해 받아오는 값이 null이 아닌 것을 찾아 수정합니다.	
   ```java
   @PostMapping("/info_modify")
 	public @ResponseBody int infoModify(MemberVO vo) throws Exception{		
@@ -1428,32 +1448,79 @@
 				}
 			}
 			modify=service.infoModify(map);	
-			System.out.println("modify : "+modify);
 	    }catch(Exception e) {
 	    	System.out.println(e.getMessage());
 	    }
-		return modify;		
+	    return modify;		
 	}
   ```
-**2. 게시물관리**
-> 내가 쓴 게시물 제목을 확인할 수 있으며 선택 후 삭제 가능합니다.
+**2. 게시물관리/ 댓글관리**
+> 내가 쓴 게시물 제목, 댓글 을 확인할 수 있으며 선택 후 삭제 가능합니다.
   * **화면구현**
   * **기능구현**
-  	* MemberController: 
-  ```java
+  	* MemberController 
+  		* 리스트: 접속한 유저 정보를 가져와 해당 유저가 작성한 모든 글을 페이징해서 ModelAndView로 전송합니다.
+  		* 삭제: Array로 전송된 체크박스 값을 `@RequestParam(value="postIdArr[]") List<String>`로 받아옵니다.
+  	```java
+ 	 //내가 쓴 게시물 리스트
+	@PostMapping("/myBoard")
+	public @ResponseBody ModelAndView myBoardList(Integer page, Model model, SearchCriteria cri) throws Exception {
+		logger.info("내 게시물 보기");
+		ModelAndView mv = new ModelAndView();
+		try {
+			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();		
+			UserDetailsVO userDetails = (UserDetailsVO)principal;	
+			
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("userId", userDetails.getUserId());	
+			map.put("cri", cri);	
+			model.addAttribute("board",service.myBoard(map));	
+			
+			PageMaker pageMk=new PageMaker();
+			pageMk.setCri(cri);
+			pageMk.setTotalCount(service.myBoardCnt(userDetails.getUserId()));
+			cri.setPage(page);
+			model.addAttribute("pageMk", pageMk);
+			
+			mv.setViewName("/member/mypageboard");
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		return mv;
+	}
+	
   	//게시물삭제
 	@PostMapping("/myBoardDelete")
-	public @ResponseBody int myBoardDelete(@RequestParam(value="postIdArr[]") 
-					List<String> postIdArr )throws Exception{
-		logger.info("내 게시물 삭제");
-		int result=0;
-		try {
-			result=service.myBoardDel(postIdArr);    	
+	public @ResponseBody int myBoardDelete(@RequestParam(value="postIdArr[]") List<String> postIdArr )throws Exception{
+	    logger.info("내 게시물 삭제");
+	    int result=0;
+	    try {
+		result=service.myBoardDel(postIdArr);    	
 	    }catch(Exception e) {
 	    	System.out.println(e.getMessage());
 	    }
-		return result;
+	    return result;
 	}
+  	```
+  
+  	* memberMapper.xml: 파라미터 타입을 `java.util.List`로 설정하고 동적 쿼리 foreach문을 사용해 값을 하나씩 삭제합니다.
+  	* foreach문
+  		* collection=list 또는 Array 형태로 전달받은 인자
+		* item: 전달 받은 값의 명 설정
+		* open/ close: 구문 시작 문자열/ 종료 문자열
+		* separator: 반복을 구분하는 문자열
+	```java
+	<!-- 선택한 게시물 삭제 -->
+	<delete id="myBoardDel" parameterType="java.util.List">
+		delete from board_post_20000 
+		<where>
+			post_idx in 
+			<foreach collection="list" item="item" open="(" close=")" separator=",">
+				 #{item}
+			</foreach>
+		</where>		
+	</delete>
+	<!-- 내가 쓴 댓글 삭제 -->
 	<delete id="myReplyDel" parameterType="java.util.List">
 		delete from reply_20000 
 		<where>
@@ -1463,87 +1530,253 @@
 			</foreach>
 		</where>		
 	</delete>
-  ```
-**3. 댓글관리**
-> 내가 쓴 댓글 내용을 확인할 수 있으며 선택 후 삭제 가능합니다.
+  	```
+	
+**3. 회원탈퇴**
+> 탈퇴시 사용자 권한을 변경해 계정의 아이디와 이메일, 닉네임을 사용할 수 없습니다. 7일 이후 모든 정보가 삭제됩니다.
+**1. 회원탈퇴 클릭시**
   * **화면구현**
   * **기능구현**
-  ```java
-  	//내가 쓴 댓글 리스트
-	@PostMapping("/myReply")
-	public @ResponseBody ModelAndView myReplyList(Integer page,Model model,
-			SearchCriteria cri) throws Exception {
-		logger.info("내 댓글 보기");
-		ModelAndView mv = new ModelAndView();
-		try {
-			Object principal = SecurityContextHolder.getContext()
-					.getAuthentication().getPrincipal();		
-			UserDetailsVO userDetails = (UserDetailsVO)principal;
-			
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("userId", userDetails.getUserId());	
-			map.put("cri", cri);	
-			model.addAttribute("reply",service.myReply(map));
-	    
-			PageMaker pageMk=new PageMaker();
-			pageMk.setCri(cri);
-			pageMk.setTotalCount(service.myReplyCnt(userDetails.getUserId()));
-			cri.setPage(page);
-			model.addAttribute("pageMk", pageMk);
-
-			mv.setViewName("/member/mypagereply");
-		}catch(Exception e){
-			System.out.println(e.getMessage());
+   	* MemberController: 현재 접속된 계정의 정보를 가져와 탈퇴처리 후 결과 값(1)을 전송합니다.
+	  ```java
+		//회원탈퇴처리
+		@PostMapping(value="/memLeave")
+		public @ResponseBody int memLeave() throws Exception{
+			logger.info("탈퇴처리");
+			int result=0;
+			try {
+			    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			    UserDetailsVO userDetails = (UserDetailsVO)principal;			    
+			    String userId=userDetails.getUserId();
+			    result=service.homeLeave(userId);
+			}catch(Exception e) {
+				System.out.println(e.getMessage());
+			}
+			return result; 
 		}
-		return mv;
+	  ```
+	  
+   	* memberMapper.xml: 탈퇴 요청한 계정의 권한을 `ROLE_LEAVE`로 변경해 사이트 접근을 막고 아이디와 이메일, 닉네임 재사용을 막습니다. 
+	  ```java
+		<!-- 회원탈퇴 -->
+		<update id="memLeave" parameterType="hashmap">
+			update member_info set mem_role='ROLE_LEAVE', mem_levdate=sysdate where mem_id=#{userId}
+		</update>
+	  ```
+	  
+   	* member.js: 탈퇴 완료시 로그아웃합니다.
+   	```java
+	success:function(data){
+		if(data==0){
+			alert('서버 오류로 실패하였습니다.');
+		}else{
+			alert('회원탈퇴가 완료되었습니다.보다 나은 서비스로 다시 만나뵐 수 있기를 바랍니다.');
+			location.href="/member/logout";
+		}
 	}
-  ```
-**4. 회원탈퇴**
-> 탈퇴시 7일 이후 모든 정보가 삭제됩니다. 그 전까진 계정의 아이디와 이메일, 닉네임을 사용할 수 없습니다. 
-  * **화면구현**
+	```
+**2. 탈퇴 7일후**
   * **기능구현**
-  ```java
-  	//회원탈퇴처리
-	@PostMapping(value="/memLeave")
-	public @ResponseBody int memLeave() throws Exception{
-		logger.info("탈퇴처리");
-		int result=0;
-		try {
-			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		    UserDetailsVO userDetails = (UserDetailsVO)principal;			    
-		    String userId=userDetails.getUserId();
-		    result=service.homeLeave(userId);
-		}catch(Exception e) {
-			System.out.println(e.getMessage());
-		}
-		return result; 
+  	* AutoDelete: 매일 12시 10분에 자동 실행합니다. 
+  	* 현재 시간 - 탈퇴 계정의 날짜를 시간으로 바꿔 계산해 다시 day로 계산한 후 `days>7`시 해당 계정을 삭제합니다.  	 
+	```java
+	//탈퇴한 회원 7일후 자동 삭제, 자동 삭제 매일 0시10분
+	@Scheduled(cron="0 10 00 * * ?")
+	public void autoDeleteUser() throws Exception {	
+		System.out.println("탈퇴 유저 자동 삭제>>>>>>>>>>>>>>>>>");
+		Calendar cal=Calendar.getInstance();	
+		cal.setTime(new Date()); //현재날짜저장		
+		List<MemberVO> memList=adminDAO.levMemList(); //탈퇴멤버
+		Calendar levCal=Calendar.getInstance();			
+		memList.forEach(mem->{
+			try {
+				levCal.setTime(mem.getLevDate());
+				//현재시간 - 탈퇴시간
+				long sec=cal.getTimeInMillis()-levCal.getTimeInMillis();
+				int days=(int)sec/(24*60*60*1000);
+				if(days>7) {
+					adminDAO.deleteMem(mem.getUserId());					
+				}
+			}catch(Exception e) {
+				System.out.println(e.getMessage());
+			}
+		});
 	}
-  ```
-
+	```
+	* adminMapper: 해당 계정 아이디를 찾아 삭제합니다.  	 
+	```java
+	<!-- 회원삭제 -->
+	<delete id="deleteMem">
+		delete from member_info where mem_id=#{value}
+	</delete>
+	```
+---
 
 ### 관리자 페이지
 **1. 유저관리**
-  *  아이디 또는 닉네임으로 유저를 검색할 수 있습니다.
-  *  총 유저 수, 아이디, 닉네임, 상태(권한), 가입일, 게시글수, 댓글수를 보여줍니다.
-  *  유저를 선택 한 후 유저 상태를 변경할 수 있습니다(활동/ 활동정지)
-      
+> 총 유저 수, 아이디, 닉네임, 상태(권한), 가입일, 게시글수, 댓글수를 보여줍니다. 아이디 또는 닉네임으로 유저를 검색할 수 있습니다.  
+> 유저를 선택 한 후 유저 상태를 변경할 수 있습니다(활동/ 활동정지)
+  * **화면구현**
+  * **기능구현**
+   	* MemberController: 선택한 유저의 상태 변경을 넘어온 role 값으로 구분해 활동 또는 활동정지를 합니다. 
+	 ```java
+	//유저상태변경
+	@PostMapping("/userRoleModify")
+	public @ResponseBody int chkUserRoleModify(@RequestParam(value="userIdArr[]") List<String> userIdArr,String role) 
+		throws Exception{
+		logger.info("선택 유저 상태 변경");
+		int result=0;
+		try {
+			if(role.equals("stop")) {
+				role="ROLE_STOP";
+			}else {
+				role="ROLE_MEMBER";
+			}
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("userIdArr", userIdArr);
+			map.put("role", role);
+			result=service.chkUserRoleModify(map);
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return result;
+	}
+	``` 
+	* adminMapper.xml
+		* 유저리스트: 관리자정보까지 포함한 유저 전체 리스트를 불러옵니다. 검색 조건(아이디, 닉네임)을 추가해 검색어에 맞는 정보를 불러옵니다. 
+		* 상태 변경: foreach문을 사용해 계정 상태를 반복처리합니다.
+	```java
+	<!-- 유저 전체 리스트 -->
+	<select id="userList" resultType="hashmap" parameterType="hashmap">
+		<![CDATA[select b.* from( 
+		select ROWNUM rn, mem_id,mem_nickname,to_char(mem_regdate,'yy.mm.dd') mem_regdate,mem_role, 
+            	(select count(*) from board_post_20000 bp where a.mem_id=bp.mem_id)+
+            	(select count(*) from board_post_10000 bp where a.mem_id=bp.mem_id) board_sum, 
+            	(select count(*) from reply_20000 bp where a.mem_id=bp.mem_id) reply_sum 
+           	from member_info a 
+        	where rownum <= #{cri.page} * #{cri.pageLen}]]>
+        	<include refid="search" />
+        	<![CDATA[order by mem_regdate) b 
+        where rn > (#{cri.page} -1) * #{cri.pageLen}  order by rn]]>
+	</select>
+	<!-- 유저 검색 조건 -->
+	<sql id="search">
+		<if test="cri.searchType != null">		
+			<if test="cri.searchType == '0'.toString()"> and mem_id like '%'||#{cri.keyword}||'%' </if>
+			<if test="cri.searchType == '1'.toString()"> and mem_nickname like '%'||#{cri.keyword}||'%' </if>
+		</if>
+	</sql>
+	<!-- 유저 상태 변경 -->
+	<update id="chkUserRoleModify" parameterType="java.util.List">
+		update member_info set mem_role=#{role}
+		<where> mem_id in
+			<foreach collection="userIdArr" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</where>
+	</update>
+	```
 **2. 메뉴관리**
-  *  게시판 메뉴, 게시판, 카테고리를 추가, 수정, 삭제할 수 있습니다.
-  *  게시판 메뉴 삭제시 하위 게시판과 카테고리도 함께 삭제됩니다.
-  *  게시판 삭제시 하위 카테고리도 함께 삭제됩니다.
-
-
+> 게시판 메뉴, 게시판, 카테고리를 추가, 수정, 삭제할 수 있습니다.  
+> 게시판 메뉴 삭제시 하위 게시판과 카테고리도 함께 삭제됩니다. 게시판 삭제시 하위 카테고리도 함께 삭제됩니다.  
+  * **화면구현**
+  * **기능구현(코드리뷰 게시판만 작성)**
+   	* adminMapper.xml
+   		* 게시판 생성: 게시판 메뉴에 첫 게시판 생성시 map으로 받아온 값을 넣고 `우선순위 값을 1`로 기입해서 처리, 
+   		* 그 다음 게시판 생성은 현재 게시판 메뉴의 게시판 `우선순위 최고값+1` 처리합니다.
+   		* 게시판 수정/ 삭제: 게시판 ID값으로 게시판명을 수정하거나 게시판 데이터를 삭제합니다. 삭제시 하위 카테고리도 삭제됩니다.
+	 ```java
+	 <!-- 새로 생성한 게시판 메뉴에 첫 게시판 생성시 : 우선순위=1-->
+	<insert id="firBoardName" parameterType="hashmap">
+		insert into board_list values(board_list_seq.nextval,#{brdName},1,${brdMenuIdx})
+	</insert>
+	 <!-- 게시판 추가 -->
+	 <insert id="addBoardName" parameterType="hashmap">
+		insert into board_list values(board_list_seq.nextval,#{brdName},
+		(select max(brd_order)+1  from board_list where brd_menu_idx=${brdMenuIdx}),${brdMenuIdx})
+	</insert>
+	
+	<!-- 게시판 수정/삭제 -->
+	<update id="brdModify" parameterType="hashmap">
+		update board_list set brd_name=#{brdValue} where brd_idx=${brdId}
+	</update>
+	<delete id="brdDelete">
+		delete from board_list where brd_idx=${brdId}
+	</delete>
+	 ```
+	 * 게시판 테이블 생성시 제약조건('brd_menu_idx'값을 fk로 등록해 게시판메뉴 데이터 삭제시 해당 값을 가지고 있는 데이터 자동 삭제)을 설정해 상위 데이터가 삭제되면 연결된 하위 데이터도 함께 삭제합니다.
+	 ```java
+	 ...생략... --게시판 제약조건: 게시판 메뉴 삭제시 해당 게시판 삭제
+	 constraint board_list foreign key (brd_menu_idx) 
+	references board_menu (brd_menu_idx)
+	on delete cascade
+	 ```
 ### 기타기능
+> 주기적인 작업을 실행하기 위해 @Scheduled 어노테이션을 적용합니다. cron 표현식으로 자동 실행 날짜와 시간을 설정합니다.
    * DB에 없는 첨부파일 자동 삭제
-      + DB 파일 리스트 데이터와  AWS S3 파일 리스트를 비교해 DB에 없는 파일을 자동으로 삭제합니다.
-      + 매일 23시 59분 59초에 실행
+      * AutoDelete: 매일 23시 59분 59초에 실행, DB 파일 리스트 데이터와  AWS S3 파일 리스트를 가져와 비교합니다.
+  	 ```java
+      // DB에 없는 첨부 파일 매일 23시 59분 자동 삭제(aws s3)
+	@Scheduled(cron="0 59 23 * * ?")
+	public void autoDeleteFiles() throws Exception {
+		System.out.println("파일 삭제 시작>>>>>>>>>>>>>>>>>>");
+		String path=getFolder();
+		List<String> fileList=new ArrayList<>();
+		List<String> awsList=new ArrayList<>();	
+		boolean bln =false;	
+		try {
+			//DB 파일정보 가져오기
+			List<BoardAttachVO> dbList= fileDAO.allFiles();
+			//aws s3 버킷리스트 가져오기
+			awsList=awsS3.list(path);			
+			dbList.forEach(attach->{
+				fileList.add(attach.getFileId()+ "_" +attach.getFileName());				
+			});			
+			for(String s3Name:awsList) {
+				for(String dbName : fileList) {
+					if(dbName.equals(s3Name)){
+						System.out.println(s3Name+":"+dbName);
+						bln=false;
+						break;
+					}else {
+						System.out.println(s3Name+":"+dbName);
+						bln=true;
+					}					
+				}
+				if(bln) {
+					awsS3.delete(path, s3Name);
+				}	
+			}
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		System.out.println("파일 삭제 끝>>>>>>>>>>>>>>>>>>");
+	}
+   	```
+      * AwsS3: DB에 없는 s3 파일을 자동으로 삭제합니다.
+      ```java
+      //파일삭제
+    public void delete(String path,String key) {
+        try {
+            //Delete 객체 생성
+            DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(this.bucket+path, key);
+            //Delete
+            this.s3Client.deleteObject(deleteObjectRequest);
+        } catch (AmazonServiceException e) {
+            e.printStackTrace();
+        } catch (SdkClientException e) {
+            e.printStackTrace();
+        }
+    }
+      ```
+---   
       
-# 프로젝트 후기
+# 프로젝트 후기🎊🎞
 > 초기 구상한 프로젝트는 게시판 기능과 회원가입, 로그인 정도였는데 여러 사이트들을 비교하면서 날씨, 채팅, 권한에 따른 기능, 관리자 페이지, AWS를 이용한 웹 서비스 제공 등 좀 더 다양한 기능을 고민하며 넣다 보니 생각보다 개발 기간이 오래 걸린 것 같습니다.  
 > 하지만 javascript, SQL 등 전보다 쉽게 작성 할 수 있게 되었으며 웹 개발의 구조를 이해할 수 있는 계기가 되었습니다.
 
 > Security 구조 파악과 DB정보를 하나의 Query문으로 작성해 출력, AWS를 사용해 웹 서비스를 제공하는 부분을 이해하고 구현하기 위해 같은 주제지만 조금씩 다른 코드들을 비교해나가면서 이해를 하면서 내 프로젝트에 더 맞는 코드로 작성할 수 있게 되었습니다.
 > 
->아쉬었던 점은 Spring AOP 기능을 활용하지 못한 부분과 그림을 첨부해 보여주는 기능, 채팅방을 여러개 생성해 입장하는 기능을 구현하지 못한게 아쉬웠고, 또 혼자 개발한 점이 큰 것 같습니다. 기능과 코딩 개선을 혼자 고민하면서 개발 속도도 점점 느려지고, 다른 사람의 코드를 보고 소통할 수 있는 기회도 없어 내 코드에 지적할 사람이 없어서 이게 맞는 건가 싶은 생각이 많이 들었습니다. 그리고 협업을 위한 버전 관리 시스템(git)을 활용하지 못해 후에 고생을 좀 할 것 같다는 생각이 들었습니다.
-
+>아쉬었던 점은 Spring AOP 기능을 활용하지 못한 부분과 그림을 첨부해 보여주는 기능, 채팅방을 여러개 생성해 입장하는 기능을 구현하지 못한게 아쉬웠고, 또 혼자 개발한 점이 큰 것 같습니다. 기능과 코딩 개선을 혼자 고민하면서 개발 속도도 점점 느려지고, 다른 사람의 코드를 보고 소통할 수 있는 기회도 없어 내 코드에 지적할 사람이 없어서 이게 맞는 건가 싶은 생각이 많이 들었습니다. 그리고 협업을 위한 버전 관리 시스템(git)을 잘 활용하지 못해 아쉬웠습니다.
+>
 > 부족한 부분이 많은 프로젝트이지만 배웠던 부분을 복습하고 새로운 기능을 공부를 할 수 있어서 좋았고, 결과물이 어느 정도 구색이 갖춰진 것 같아 내심 만족스러운 프로젝트였습니다. 부족하지만 끝까지 봐주셔서 감사합니다.
