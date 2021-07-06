@@ -679,7 +679,7 @@
 	|사용자|글 읽기|글 쓰기|공지글 쓰기|글 수정|글 삭제|
 	|:----:|:----:|:----:|:----:|:----:|:----:|
 	|비회원|O|X|X|X|X|
-	|회원|O|O|x|O|O|
+	|회원|O|O|X|O|O|
 	|관리자|O|O|O|O|O|
 * **화면구현**
 * **기능구현**
@@ -687,7 +687,7 @@
 **1. 전체/ 인기글** 
 > 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개)   
 > 전체는 커뮤니티에 존재하는 모든 글을 보여주며, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
-	 * BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
+  *  BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
 	```java
 	@RequestMapping(value = "/brdnormal", method=RequestMethod.GET)
 	public void tabCla(@ModelAttribute("nav")String nav,@ModelAttribute("cla")String cla,
@@ -755,12 +755,10 @@
 	
 **2. 게시판/ 카테고리**
 > 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다. 
-  *  boardMapper.xml  
-	+ 게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.  
-   	+ 게시판: `brd_idx=${mid}` 선택한 게시판에 `b.cate_idx=d.cate_idx(+)` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.
-   		[이미지넣기]  
-   	+ 카테고리: `cate_idx=${sub}` 선택한 카테고리와 `b.cate_idx=d.cate_idx` 동일한 카테고리 게시물을 출력합니다.  
-	
+  * boardMapper.xml
+   	*  게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.  
+   	*  게시판: `brd_idx=${mid}` 선택한 게시판에 `b.cate_idx=d.cate_idx(+)` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.(이미지)
+   	*  카테고리: `cate_idx=${sub}` 선택한 카테고리와 `b.cate_idx=d.cate_idx` 동일한 카테고리 게시물을 출력합니다.  
 	```java
 	<!-- 게시판별 공지 -->
 	<select id="noticeListBoard" resultType="BrdVO" resultMap="boardMap">
@@ -794,8 +792,9 @@
 ### 게시판 리스트 공통 기능
 * **화면구현**
 * **기능구현**
+
 **1. 공지 숨기기** 
-      * board.js: 공지 숨기기 클릭시 클래스명에 'blind' 존재 여부 확인해 전체공지와 게시판 공지를 보여주거나 숨깁니다.
+  * board.js: 공지 숨기기 클릭시 클래스명에 'blind' 존재 여부 확인해 전체공지와 게시판 공지를 보여주거나 숨깁니다.
       ```java
      	 $("input:checkbox[id='notice_hidden']").click(function(){
 		var noticeChk = document.getElementsByClassName("noticeChk");
@@ -806,9 +805,8 @@
       ```
 
 **2. 목록 개수**
-      * 한 페이지 목록 개수 변경에 필요한 값을 주소로 전송하고, UriComponents 클래스를 통해 원하는 url을 생성해서 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
+  * brdcate.jsp: 한 페이지 목록 개수 변경에 필요한 값을 주소로 전송하고, UriComponents 클래스를 통해 원하는 url을 생성해서 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
 	```java
-	//brdcate.jsp
 	<c:when test="${empty sub}">
 		<li onClick="location.href='${pageMk.makeQueryLen(mid,5)}'">5개씩</li>
 		..생략..
@@ -823,22 +821,22 @@
 	}
 	```
 **3. 게시물 번호**
-      * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
-      * 현재 페이지의 첫 번호(num)=총게시물-((현재 페이지 번호-1) X 현재 목록 개수))
-      * 즉, (179개,1page, 10개씩)=>179 부터 시작, (179개,2page, 10개씩)=169 부터 시작
-      * 리스트 하나 출력시 ${num-1} 값을 -1씩 해주면서 출력한다.(179,178,176...)
+  * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
+  * 현재 페이지의 첫 번호(num)=총게시물-((현재 페이지 번호-1) X 현재 목록 개수))
+  *  즉, (179개,1page, 10개씩)=>179 부터 시작, (179개,2page, 10개씩)=169 부터 시작
+  *  리스트 하나 출력시 ${num-1} 값을 -1씩 해주면서 출력한다.(179,178,176...)
 	```java
 	<c:set var="num" value="${pageMk.totalCount-((pageMk.cri.page-1)*pageMk.cri.pageLen) }" />
 		..생략..
 	<c:set var="num" value="${num-1}" />
 	```
 **4. 첨부파일 여부, 게시물 날짜, 페이징 기능**
-	+ 게시물 날짜(board_regtime): ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
+  *  게시물 날짜(board_regtime): ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
    				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)  	
-        + 첨부파일 수(fileY): fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
-	+ 댓글 수(reply_cnt): 현재 게시물 번호와 일치하는 댓글 수를 가져와 1개 이상이면 제목 옆에 개수 표시를 합니다.
-	+ 답글 기능: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.(부모글번호=group, 답글=step+1, 답글의 답글=indent+1) 
-	+ 페이징: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 해당 페이지까지의 게시물을 설정하고  
+  * 첨부파일 수(fileY): fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
+  *  댓글 수(reply_cnt): 현재 게시물 번호와 일치하는 댓글 수를 가져와 1개 이상이면 제목 옆에 개수 표시를 합니다.
+  *  답글 기능: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.(부모글번호=group, 답글=step+1, 답글의 답글=indent+1) 
+  * 페이징: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 해당 페이지까지의 게시물을 설정하고  
 		`rn > (#{cri.page} -1) * #{cri.pageLen}` 해당 페이지에 보여줄 게시물수를 설정한다. 즉, '3페이지 10개씩' 이면 rownum컬럼 순으로 30개로 자른 다음
 		10개씩 잘라 세번째 부분부터 출력된다.		 
 	```java
@@ -857,9 +855,9 @@
 	       	 	<![CDATA[ order by rn ASC) a 
 	        	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0) b , board_list c
 	        where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
-     </select>
-	```
-	```java
+     	</select>
+	
+	//PageMaker
 	//페이지수(게시판 기본형:검색X)
 	public String makeQuery(int page) {
 		UriComponents uriCom = UriComponentsBuilder.newInstance()
@@ -869,8 +867,8 @@
 	}
 	```
 **5. 검색**
-      * 리스트 출력 쿼리 안에 `<include refid="search" />`을 넣어 id가 'search'인 쿼리를 넣어 함께 실행합니다.
-      * 검색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
+  * 리스트 출력 쿼리 안에 `<include refid="search" />`을 넣어 id가 'search'인 쿼리를 넣어 함께 실행합니다.
+  * 검색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
 	```java
 	<select> //출력쿼리문
 		...
@@ -896,7 +894,7 @@
 * **화면구현**
 * **기능구현**
 **1. 게시판/ 카테고리 목록**
-> 전체/ 인기글에서 '글쓰기' 버튼 클릭시 커뮤니티에 존재하는 모든 게시판 목록을 보여주고 접속된 게시판에서 '글쓰기' 버튼 클릭시 해당 게시판 메뉴의 게시판 목록을 보여줍니다.
+>  전체/ 인기글에서 '글쓰기' 버튼 클릭시 커뮤니티에 존재하는 모든 게시판 목록을 보여주고, 접속된 게시판에서 '글쓰기' 버튼 클릭시 해당 게시판 메뉴의 게시판 목록을 보여줍니다.
 > 게시판 선택 변경시 카테고리 목록이 변경됩니다.
   * brdController: 글쓰기 페이지 접속시 해당 게시판 메뉴의 게시판 목록과 카테고리를 불러옵니다. 다른 게시판으로 변경시 카테고리 목록도 변경됩니다.
 	```java
@@ -935,7 +933,7 @@
 > 폰트, 크기, 굵기, 정렬 등의 기능을 사용해 게시글을 꾸밀 수 있습니다.
    * register.js: iframe의 디자인모드를 실행해 iframe에 적힌 글을 꾸밉니다.
    ```java
-   	//iframe 디자인모드
+   //iframe 디자인모드
 	var iframe= document.getElementById("content_iframe").contentWindow;
 	var iframeD = iframe.document;	
 	iframeD.designMode = 'on';
@@ -951,8 +949,7 @@
 > 첨부한 파일은 저장 경로와 고유 식별자를 생성한 후 처리합니다. 파일 등록시 Amazon S3에 바로 저장되지만 글쓰기 완료 전까진 DB에는 저장되지 않습니다.
    * regiter.jsp: `enctype="multipart/form-data"` 설정을 해주면 파일을 한번에 여러개 등록할 수 있습니다.
    ```java
-   	<form role="form" method="post" name="rigForm" id="rigform" 
-			onsubmit="insert(document.rigForm); return false;" enctype="multipart/form-data">
+   <form role="form" method="post" name="rigForm" id="rigform" onsubmit="insert(document.rigForm); return false;" enctype="multipart/form-data">
    ```
    * uploadController: UUID.randomUUID를 사용해 고유 파일명을 생성합니다. 고유 식별자를 생성하는 이유는 첨부파일 다운로드시 다른 파일과 혼동하지 않게하며 다른 컨텐츠의 임의 접근을 방지합니다.	
    ```java
@@ -989,8 +986,8 @@
 	}				
    ```
    * AwsS3: accessKey, secretKey, clientRegion를 사용해 awsS3 클라이언트를 생성하고 bucket명을 통해 해당 S3 bucket에 올린 파일을 저장합니다.
-	* ClasspathPropertiesFileCredentialsProvider(): 해당 생성자가 프로젝트의 classpath에 있는 AwsCredentials.properties 파일을 읽어 
-    		안에 있는 accessKey, secretKey 값을 자동으로 사용합니다.
+    	* ClasspathPropertiesFileCredentialsProvider(): 해당 생성자가 프로젝트의 classpath에 있는 AwsCredentials.properties 파일을 읽어 
+    		안에 있는 accessKey, secretKey 값을 자동으로 사용합니다. 
    ```java
     //aws S3 client 생성
     private void createS3Client() {
@@ -1018,9 +1015,9 @@
 
 **4. 글쓰기등록**
 > 폰트, 크기, 굵기, 정렬 등의 기능을 사용해 게시글을 꾸밀 수 있습니다.
-   * boardMapper.xml: 
-   	* selectKey를 사용해 등록시 생성되는 게시물 번호를 다음 쿼리로 return해 첨부파일이 있으면 첨부파일 쿼리에 게시물 번호를 넣어줍니다.
-   	* post_group 컬럼에 게시물 번호를 등록해서 부모글 표시를 합니다.
+   * boardMapper.xml
+    	* selectKey를 사용해 등록시 생성되는 게시물 번호를 다음 쿼리로 return해 첨부파일이 있으면 첨부파일 쿼리에 게시물 번호를 넣어줍니다.
+    	* post_group 컬럼에 게시물 번호를 등록해서 부모글 표시를 합니다.
    ```java
 	<insert id="createCmuPage" parameterType="BrdVO">
 	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
@@ -1148,7 +1145,7 @@
 **2. 첨부파일 목록/ 다운로드**
    * UploadController: 첨부된 파일 목록이 표시되며 첨부 파일 클릭시 RESTful로 접속해 다운로드 합니다.
    * 첨부파일 목록  		 
-	```java
+```java
 	//UploadController
 	//첨부파일 불러오기 : 게시물 번호를 받아 첨부파일 데이터를 json으로 반환
 	@GetMapping("/getAttachList")	
@@ -1165,12 +1162,13 @@
 		}
 		return new ResponseEntity<>(list,HttpStatus.OK);
 	}
-	```
+```
    * 첨부파일 다운로드
-	* aws s3에 있는 파일에 접속하기 위해서 파일 위치 url클래스 객체 생성 후 url.openConnection()로 URLConnection 추상클래스 객체를 생성한다.
-	* 프로토콜에 맞춰 하위 클래스의 인스턴스를 얻고(HttpURLConnection) InputStream으로 값을 반환 시킵니다.
-	* HttpHeaders에 'user-Agent'로 접속한 웹브라우저에 따라 파일 이름 인코딩을 한 후 HttpHeader에 파일이름과 경로를 넣어 다운로드 가능하게 합니다. 
-   ```java
+    	* aws s3에 있는 파일에 접속하기 위해서 파일 위치 url클래스 객체 생성 후 url.openConnection()로 URLConnection 추상클래스 객체를 생성한다.
+    	* 프로토콜에 맞춰 하위 클래스의 인스턴스를 얻고(HttpURLConnection) InputStream으로 값을 반환 시킵니다.
+    	* HttpHeaders에 'user-Agent'로 접속한 웹브라우저에 따라 파일 이름 인코딩을 한 후 HttpHeader에 파일이름과 경로를 넣어 다운로드 가능하게 합니다. 
+
+```java
 	//첨부파일 다운로드
 	@GetMapping(value="/download" ,produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	public @ResponseBody ResponseEntity<byte[]> getFile(@RequestHeader(value="User-Agent")String userAgent,String path,String fileName){
@@ -1203,14 +1201,13 @@
 		  }
 		  return result;
 	}
-   ```
+```
 
 ### 댓글기능
 > 각 게시물에 댓글 읽기(리스트), 등록, 수정, 삭제를 RESTful API로 접근 제공합니다.
 * **화면구현**
 * **기능구현**
-     **1. 댓글리스트**: 선택한 게시물의 총 댓글을 가져와 페이징 처리해 ModelAndView로 데이터와 이동하고자 하는 view page를 같이 저장한다.
-     (js에서 받아온 데이터를 정리해 댓글 리스트로 출력해줍니다.)
+ 	**1.댓글리스트**: 선택한 게시물의 총 댓글을 가져와 페이징 처리해 ModelAndView로 데이터와 이동하고자 하는 view page를 같이 저장한다.(js에서 받아온 데이터를 정리해 댓글 리스트로 출력해줍니다.)     
      ```java
      	//ReplyController
 	@RequestMapping(value="/list/{nav}/{postId}/{pageNum}" , method = RequestMethod.POST)
