@@ -639,15 +639,15 @@
 > **전체공지:** 전체 공지 체크 후 글 작성 완료하면 공지 및 커뮤니티 페이지 전체에 공지가 등록됩니다.  
 > **공지글:** 공지 게시판의 공지글로 등록됩니다.
   * **화면구현**  
-  	* 글쓰기 페이지
+  	* 글쓰기 페이지  
   	![notice_reg2](https://user-images.githubusercontent.com/86868936/124622621-3f290880-deb6-11eb-9a6c-b511208ee63b.JPG)
 	
-	* 공지페이지
-	![notice_list](https://user-images.githubusercontent.com/86868936/124622654-47814380-deb6-11eb-9c30-72aae857f368.JPG)  
+	* 공지페이지  
+	![image](https://user-images.githubusercontent.com/86868936/124625211-93cd8300-deb8-11eb-9486-5818e6171081.png)
   
   * **기능구현**
   	* BrdController: 접속한 유저의 아이디와 닉네임을 가져와 작성된 글을 등록합니다. 전체공지 또는 공지글 체크 안할시 'N'값을 넣어 일반 글 표시를 합니다. 
-	```java
+		```java
 		//글쓰기 등록
 		@RequestMapping(value="/register",method=RequestMethod.POST)
 		public String insertPOST(@ModelAttribute("vo")BrdVO vo, Model model) throws Exception{
@@ -670,7 +670,7 @@
 			}
 			return str;
 		}
-	```
+		```
 	
 	* boardMapper.xml
 	 	* 공지 페이지는 답글기능이 없어 group(게시물번호)값을 넣지 않습니다.(selectkey에 대한 설명은 아래 글쓰기에 적혀있음)
@@ -690,20 +690,25 @@
 ---
 	
 ### 커뮤니티
-* **사용자별 권한**  
+**1. 사용자별 권한**  
 	|사용자|글 읽기|글 쓰기|공지글 쓰기|글 수정|글 삭제|
 	|:----:|:----:|:----:|:----:|:----:|:----:|
 	|비회원|O|X|X|X|X|
 	|회원|O|O|X|O|O|
 	|관리자|O|O|O|O|O|
-* **화면구현**  
-
-
-* **기능구현**  
-**1. 전체/ 인기글** 
+ 
+**2. 전체/ 인기글** 
 > 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개)   
 > 전체는 커뮤니티에 존재하는 모든 글을 보여주며, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
-  *  BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
+  * **화면구현**  
+	* 전체 페이지  
+	![image](https://user-images.githubusercontent.com/86868936/124625121-80221c80-deb8-11eb-8486-2b23b070b33d.png)
+	
+	* 인기글 페이지  
+	![image](https://user-images.githubusercontent.com/86868936/124625048-6aacf280-deb8-11eb-9961-9b9b858196ea.png)
+	
+  * **기능구현** 
+	* BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
 	```java
 	@RequestMapping(value = "/brdnormal", method=RequestMethod.GET)
 	public void tabCla(@ModelAttribute("nav")String nav,@ModelAttribute("cla")String cla,
@@ -769,12 +774,20 @@
 	</select>
 	```
 	
-**2. 게시판/ 카테고리**
+**3. 게시판/ 카테고리**
 > 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다. 
-  * boardMapper.xml
-   	*  게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.  
-   	*  게시판: `brd_idx=${mid}` 선택한 게시판에 `b.cate_idx=d.cate_idx(+)` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.(이미지)
-   	*  카테고리: `cate_idx=${sub}` 선택한 카테고리와 `b.cate_idx=d.cate_idx` 동일한 카테고리 게시물을 출력합니다.  
+  * **화면구현**  
+	* 게시판 페이지  
+	![image](https://user-images.githubusercontent.com/86868936/124625557-dee79600-deb8-11eb-82fd-60fefa22a3e4.png)
+	
+	* 카테고리 페이지  
+	![image](https://user-images.githubusercontent.com/86868936/124625645-f161cf80-deb8-11eb-8616-3fd7d3b0bce6.png)
+
+  * **기능구현** 
+  	* boardMapper.xml
+   		*  게시판별 공지: 커뮤니티 테이블(board_post_20000)에 공지여부(post_notice) 컬럼 값이 'Y'인 해당 게시판의 공지 게시물을 가져옵니다.  
+   		*  게시판: `brd_idx=${mid}` 선택한 게시판에 `b.cate_idx=d.cate_idx(+)` 존재하는 카테고리 중 게시글의 카테고리가 일치하는 게시물과 카테고리가 없는 게시물이 출력됩니다.(이미지)
+   		*  카테고리: `cate_idx=${sub}` 선택한 카테고리와 `b.cate_idx=d.cate_idx` 동일한 카테고리 게시물을 출력합니다.  
 	```java
 	<!-- 게시판별 공지 -->
 	<select id="noticeListBoard" resultType="BrdVO" resultMap="boardMap">
@@ -808,22 +821,25 @@
 ---
 
 ### 게시판 리스트 공통 기능
-* **화면구현**
-* **기능구현**
-
 **1. 공지 숨기기** 
-  * board.js: 공지 숨기기 클릭시 클래스명에 'blind' 존재 여부 확인해 전체공지와 게시판 공지를 보여주거나 숨깁니다.
-      ```java
-     	 $("input:checkbox[id='notice_hidden']").click(function(){
-		var noticeChk = document.getElementsByClassName("noticeChk");
-		for(var i=0;i<noticeChk.length;i++){
-			noticeChk[i].classList.toggle('blind');
-		}
-	})
-      ```
+  * **화면구현**
+	
+  * **기능구현**
+ 	 * board.js: 공지 숨기기 클릭시 클래스명에 'blind' 존재 여부 확인해 전체공지와 게시판 공지를 보여주거나 숨깁니다.
+	      ```java
+		 $("input:checkbox[id='notice_hidden']").click(function(){
+			var noticeChk = document.getElementsByClassName("noticeChk");
+			for(var i=0;i<noticeChk.length;i++){
+				noticeChk[i].classList.toggle('blind');
+			}
+		})
+	      ```
 
 **2. 목록 개수**
-  * brdcate.jsp: 한 페이지 목록 개수 변경에 필요한 값을 주소로 전송하고, UriComponents 클래스를 통해 원하는 url을 생성해서 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
+  * **화면구현**
+	
+  * **기능구현**
+  	* brdcate.jsp: 한 페이지 목록 개수 변경에 필요한 값을 주소로 전송하고, UriComponents 클래스를 통해 원하는 url을 생성해서 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
 	```java
 	<c:when test="${empty sub}">
 		<li onClick="location.href='${pageMk.makeQueryLen(mid,5)}'">5개씩</li>
@@ -840,23 +856,29 @@
 	```
 	
 **3. 게시물 번호**
-  * 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
-  * 현재 페이지의 첫 번호(num)=총게시물-((현재 페이지 번호-1) X 현재 목록 개수))
-  *  즉, (179개,1page, 10개씩)=>179 부터 시작, (179개,2page, 10개씩)=169 부터 시작
-  *  리스트 하나 출력시 ${num-1} 값을 -1씩 해주면서 출력한다.(179,178,176...)
-```java
-	<c:set var="num" value="${pageMk.totalCount-((pageMk.cri.page-1)*pageMk.cri.pageLen) }" />
-		..생략..
-	<c:set var="num" value="${num-1}" />
-```
+> 글 번호는 해당 게시판/ 카테고리의 총 게시물 수의 역순으로 보여줍니다.
+> 
+  * **화면구현**
+	
+	
+  * **기능구현**
+  	* brdnormal.jsp, brdcate.jsp: `현재 페이지의 첫 번호(num)=총게시물-((현재 페이지 번호-1) X 현재 목록 개수))` 즉, (179개,1page, 10개씩)=>179 부터 시작, (179개,2page, 10개씩)=169 부터 시작, 리스트 하나 출력시 ${num-1} 값을 -1씩 해주면서 출력한다.(179,178,176...)
+	```java
+		<c:set var="num" value="${pageMk.totalCount-((pageMk.cri.page-1)*pageMk.cri.pageLen) }" />
+			..생략..
+		<c:set var="num" value="${num-1}" />
+	```
 
 **4. 게시물 날짜, 첨부파일 여부, 답글 정렬, 페이징 기능**
-  * **게시물 날짜(board_regtime)**: ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
+  * **화면구현**
+	
+  * **기능구현**
+  	* **게시물 날짜(board_regtime)**: ```DECODE 함수```를 사용해 등록된 글의 날짜와 현재 날짜가 같으면 `시간`으로 표시, 아니면 'YYYY.MM.DD' `날짜`로 표시됩니다.
    				(처음에 CASE WHEN을 사용했는데 aws에선 작동을 안해 함수를 바꿈)  	
-  * **첨부파일 여부(fileY)**: fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
-  * **댓글 수(reply_cnt)**: 현재 게시물 번호와 일치하는 댓글 수를 가져와 1개 이상이면 제목 옆에 개수 표시를 합니다.
-  * **답글 정렬**: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.(부모글번호=group, 답글=step+1, 답글의 답글=indent+1) 
-  * **페이징**: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 해당 페이지까지의 게시물을 설정하고  
+ 	 * **첨부파일 여부(fileY)**: fileY 컬럼을 생성해 각 리스트의 파일 수를 가져와 1게 이상이면 파일첨부 아이콘이 표시됩니다.
+  	* **댓글 수(reply_cnt)**: 현재 게시물 번호와 일치하는 댓글 수를 가져와 1개 이상이면 제목 옆에 개수 표시를 합니다.
+  	* **답글 정렬**: `order by post_group DESC, post_step ASC,post_indent ASC`으로 답글을 정렬합니다.(부모글번호=group, 답글=step+1, 답글의 답글=indent+1) 
+  	* **페이징**: `rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0` 해당 페이지까지의 게시물을 설정하고  
 		`rn > (#{cri.page} -1) * #{cri.pageLen}` 해당 페이지에 보여줄 게시물수를 설정한다. 즉, '3페이지 10개씩' 이면 rownum컬럼 순으로 30개로 자른 다음
 		10개씩 잘라 세번째 부분부터 출력된다.		 
 	```java
@@ -887,8 +909,11 @@
 	}
 	```
 **5. 검색**
-  * 리스트 출력 쿼리 안에 `<include refid="search" />`을 넣어 id가 'search'인 쿼리를 넣어 함께 실행합니다.
-  * 검색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
+  * **화면구현**
+	
+  * **기능구현**
+  	* 리스트 출력 쿼리 안에 `<include refid="search" />`을 넣어 id가 'search'인 쿼리를 넣어 함께 실행합니다.
+ 	* 검색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
 	```java
 	<select> //출력쿼리문
 		...
