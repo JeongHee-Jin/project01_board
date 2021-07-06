@@ -628,62 +628,65 @@
 -----
       
 ### 공지
-* **사용자별 권한**  
+**1. 사용자별 권한**  
    |사용자|글 읽기|글 쓰기|글 수정|글 삭제|
    |:----:|:----:|:-----:|:-----:|:-----:|
    |비회원|O|X|X|X|
    |회원|O|X|X|X|
    |관리자|O|O|O|O|
 
- * **글쓰기**
+**2. 글쓰기**
 > **전체공지:** 전체 공지 체크 후 글 작성 완료하면 공지 및 커뮤니티 페이지 전체에 공지가 등록됩니다.  
 > **공지글:** 공지 게시판의 공지글로 등록됩니다.
   * **화면구현**  
-  ![notice_reg2](https://user-images.githubusercontent.com/86868936/124622621-3f290880-deb6-11eb-9a6c-b511208ee63b.JPG)
-  ![notice_list](https://user-images.githubusercontent.com/86868936/124622654-47814380-deb6-11eb-9c30-72aae857f368.JPG)
+  	* 글쓰기 페이지
+  	![notice_reg2](https://user-images.githubusercontent.com/86868936/124622621-3f290880-deb6-11eb-9a6c-b511208ee63b.JPG)
+	
+	* 공지페이지
+	![notice_list](https://user-images.githubusercontent.com/86868936/124622654-47814380-deb6-11eb-9c30-72aae857f368.JPG)  
   
   * **기능구현**
-  * BrdController: 접속한 유저의 아이디와 닉네임을 가져와 작성된 글을 등록합니다. 전체공지 또는 공지글 체크 안할시 'N'값을 넣어 일반 글 표시를 합니다. 
+  	* BrdController: 접속한 유저의 아이디와 닉네임을 가져와 작성된 글을 등록합니다. 전체공지 또는 공지글 체크 안할시 'N'값을 넣어 일반 글 표시를 합니다. 
 	```java
-	//글쓰기 등록
-	@RequestMapping(value="/register",method=RequestMethod.POST)
-	public String insertPOST(@ModelAttribute("vo")BrdVO vo, Model model) throws Exception{
-		String str="redirect:/cmu/brd";
-		try {
-			//유저 ID,닉네임
-			UserDetailsVO principal = (UserDetailsVO) SecurityContextHolder
-					.getContext().getAuthentication().getPrincipal();
-			vo.setMemId(principal.getUserId());
-			vo.setMemNickName(principal.getUserNickName());
-			//공지글 체크 없을시
-			if(vo.getNotice()==null) {vo.setNotice("N");}			
-			service.regist(vo);	//등록
-			model.addAttribute("mid",vo.getBrdId());
+		//글쓰기 등록
+		@RequestMapping(value="/register",method=RequestMethod.POST)
+		public String insertPOST(@ModelAttribute("vo")BrdVO vo, Model model) throws Exception{
+			String str="redirect:/cmu/brd";
+			try {
+				//유저 ID,닉네임
+				UserDetailsVO principal = (UserDetailsVO) SecurityContextHolder
+						.getContext().getAuthentication().getPrincipal();
+				vo.setMemId(principal.getUserId());
+				vo.setMemNickName(principal.getUserNickName());
+				//공지글 체크 없을시
+				if(vo.getNotice()==null) {vo.setNotice("N");}			
+				service.regist(vo);	//등록
+				model.addAttribute("mid",vo.getBrdId());
 			if(vo.getNav().equals(10000)) {
-				str= "redirect:/notice";
+					str= "redirect:/notice";
+				}
+			}catch(Exception e) {
+				System.out.println(e.getMessage());
 			}
-		}catch(Exception e) {
-			System.out.println(e.getMessage());
+			return str;
 		}
-		return str;
-	}
 	```
 	
 	* boardMapper.xml
 	 	* 공지 페이지는 답글기능이 없어 group(게시물번호)값을 넣지 않습니다.(selectkey에 대한 설명은 아래 글쓰기에 적혀있음)
 	 	* 공지글 여부 컬럼 post_notice: 'T'=전체공지, 'Y'=게시판공지, 'N'= 일반글 
-	```java
-	<!-- register : 글쓰기 (공지,커뮤니티)-->
-	<insert id="createCmuPage" parameterType="BrdVO">
-	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
-			select board_post_${nav}_seq.currval as postId from dual
-		</selectKey>
-	 	insert into board_post_${nav} 
-		(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_notice)
-		values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
-		#{title},#{content},#{memId},#{memNickName},#{notice})
-	</insert>
-	```
+		```java
+		<!-- register : 글쓰기 (공지,커뮤니티)-->
+		<insert id="createCmuPage" parameterType="BrdVO">
+			<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
+				select board_post_${nav}_seq.currval as postId from dual
+			</selectKey>
+			insert into board_post_${nav} 
+			(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_notice)
+			values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
+			#{title},#{content},#{memId},#{memNickName},#{notice})
+		</insert>
+		```
 ---
 	
 ### 커뮤니티
@@ -696,7 +699,7 @@
 * **화면구현**  
 
 
-* **기능구현**
+* **기능구현**  
 **1. 전체/ 인기글** 
 > 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개)   
 > 전체는 커뮤니티에 존재하는 모든 글을 보여주며, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
