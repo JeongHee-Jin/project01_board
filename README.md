@@ -46,6 +46,7 @@
 
 **1. 날씨정보:sunny:**  
 > Geolocation API(현재 위치 정보)와 OpenWeather API(날씨 API)를 사용해 현재 내 위치의 3시간별 기온 그래프와 날씨 아이콘으로 사용자에게 날씨 정보를 제공합니다.
+> 
   * **화면구성**  
   ![weather](https://user-images.githubusercontent.com/61307201/124220162-61c6c480-db38-11eb-899d-36f01acca1b3.JPG)
   
@@ -96,6 +97,7 @@
 	
 **2. 메인 메뉴/ 커뮤니티 메뉴/ 인기 게시판**
 > 불필요한 이동 경로를 줄이기 위해 제공되는 서비스로 커뮤니티 메뉴와 인기 게시판은 DB연결을 통해 값을 가져옵니다.
+> 
   * **화면구성**  
   ![image](https://user-images.githubusercontent.com/61307201/124342619-111a9e80-dc00-11eb-8d42-2fe98b9ee08c.png)
   
@@ -137,7 +139,10 @@
 ### 회원가입
 **1. 유효성 체크 및 중복확인**
 > 아이디, 비밀번호, 닉네임, 이메일, 전화번호에 유효성 조건을 설정해 조건에 맞게 입력되면 DB 데이터와 비교해 중복 확인을 합니다.
+> 
   * **화면기능**
+  ![join](https://user-images.githubusercontent.com/86868936/124596953-d46bd300-de9d-11eb-8a66-6233f70f4b95.gif)
+
   * **기능구현**
   	+ member.js: 유효성 조건을 비교하고 중복확인 문구를 출력합니다.	
 	```java
@@ -173,6 +178,7 @@
 		}
 	}
 	```	
+	
 	+ MemberController: 입력한 아이디 값을 받아 비교 후 값을 출력합니다.
 	```java
 	//아이디 중복체크
@@ -200,7 +206,10 @@
 
 **3. 이메일 인증 코드**
 > 인증코드 생성후 입력한 이메일로 인증코드를 전송해 인증 확인합니다.
+
   * **화면기능**
+  ![email](https://user-images.githubusercontent.com/86868936/124597010-e64d7600-de9d-11eb-8d06-8a7a18b78233.gif)
+  
   * **기능구현**
  	 * MemberService: 코드생성 후 이메일을 전송합니다.
 	```java
@@ -269,7 +278,10 @@
  
 **4. 회원가입 처리**
 > 입력된 회원 정보중 비밀번호는 암호화 처리를 한 후 DB에 저장해 회원가입을 완료합니다.
+> 
   * **화면기능**
+  ![join_result](https://user-images.githubusercontent.com/86868936/124597538-94f1b680-de9e-11eb-9df1-e0b9e1480e41.gif)
+  
   * **기능구현**
  	 * MemberController: form 안에 입력된 정보를 MemberVO로 받아와 등록에 성공하면 'success'를 전송해 가입 축하 메세지를 보여줍니다.
    	```java
