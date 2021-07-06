@@ -702,10 +702,10 @@
 > 전체는 커뮤니티에 존재하는 모든 글을 보여주며, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
   * **화면구현**  
 	* 전체 페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124625121-80221c80-deb8-11eb-8486-2b23b070b33d.png)
+	![image](https://user-images.githubusercontent.com/86868936/124627073-35090900-deba-11eb-8a15-6c166c4d4b8a.png)
 	
 	* 인기글 페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124625048-6aacf280-deb8-11eb-9961-9b9b858196ea.png)
+	![image](https://user-images.githubusercontent.com/86868936/124627189-4e11ba00-deba-11eb-8eff-d45db1779cf0.png)
 	
   * **기능구현** 
 	* BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
@@ -778,10 +778,10 @@
 > 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다. 
   * **화면구현**  
 	* 게시판 페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124625557-dee79600-deb8-11eb-82fd-60fefa22a3e4.png)
+	![image](https://user-images.githubusercontent.com/86868936/124626956-186cd100-deba-11eb-9b93-2ea0f75b3dcf.png)
 	
 	* 카테고리 페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124625645-f161cf80-deb8-11eb-8616-3fd7d3b0bce6.png)
+	![image](https://user-images.githubusercontent.com/86868936/124626820-f96e3f00-deb9-11eb-93a7-d095614c23c7.png)
 
   * **기능구현** 
   	* boardMapper.xml
