@@ -135,11 +135,11 @@
 ------	
 
 ### 회원가입
-**1. 유효성 체크 및 안내**
-> 아이디, 비밀번호, 닉네임, 이메일, 전화번호에 유효성 조건을 설정해 조건에 맞게 입력 할 수 있도록 도와줍니다.
+**1. 유효성 체크 및 중복확인**
+> 아이디, 비밀번호, 닉네임, 이메일, 전화번호에 유효성 조건을 설정해 조건에 맞게 입력되면 DB 데이터와 비교해 중복 확인을 합니다.
   * **화면기능**
   * **기능구현**
-  	+ member.js: 유효성 조건을 비교해 안내 문구를 출력합니다.	
+  	+ member.js: 유효성 조건을 비교하고 중복확인 문구를 출력합니다.	
 	```java
 	//아이디
 	var join_id = document.getElementById("join_id");
@@ -152,33 +152,27 @@
 				 id_regul.innerHTML="5~10자의 영문 대 소문자, 숫자와 특수기호(_),(-)만 사용 가능합니다."; 
 			 }
 			 id_regul.classList.remove('green');
-	```
-
-**2. 중복 확인**
-> 아이디, 이메일, 닉네임 입력시 DB 데이터와 비교해 중복 확인을 합니다.
-  * **화면기능**
-  * **기능구현 (아이디만 작성)**
-	+ member.js: 아이디, 이메일, 닉네임 입력시 DB 데이터와의 중복 확인을 ajax 비동기식으로 구현했습니다. 비교 후 안내 문구를 보여줍니다.
-	```java
-	$.ajax({
-		url: "/member/id_check",
-		type: "POST",
-		data: {"userId":(join_id.value)},
-		datatype:"json",
-		success:function(data){
-			if(data==0){
-				id_regul.classList.add('green');
-				id_regul.innerHTML="사용 가능한 ID입니다.";
-			}else{
-				id_regul.innerHTML="이미 사용중이거나 탈퇴한 아이디입니다.";
-				id_regul.classList.remove('green');
-			}
-		},error : function(errThrown){
-			console.log("err",errThrown);
+		}else{
+			$.ajax({
+				url: "/member/id_check",
+				type: "POST",
+				data: {"userId":(join_id.value)},
+				datatype:"json",
+				success:function(data){
+					if(data==0){
+						id_regul.classList.add('green');
+						id_regul.innerHTML="사용 가능한 ID입니다.";
+					}else{
+						id_regul.innerHTML="이미 사용중이거나 탈퇴한 아이디입니다.";
+						id_regul.classList.remove('green');
+					}
+				},error : function(errThrown){
+					console.log("err",errThrown);
+				}
+			})
 		}
-	})
-	```
-	
+	}
+	```	
 	+ MemberController: 입력한 아이디 값을 받아 비교 후 값을 출력합니다.
 	```java
 	//아이디 중복체크
