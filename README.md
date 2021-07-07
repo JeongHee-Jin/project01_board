@@ -935,6 +935,8 @@
 
 ### 글쓰기
 * **화면구현**
+![write](https://user-images.githubusercontent.com/86868936/124726366-a55e6b80-df48-11eb-91f1-07d03849c8ee.gif)
+
 * **기능구현**
 **1. 게시판/ 카테고리 목록**
 >  전체/ 인기글에서 '글쓰기' 버튼 클릭시 커뮤니티에 존재하는 모든 게시판 목록을 보여주고, 접속된 게시판에서 '글쓰기' 버튼 클릭시 해당 게시판 메뉴의 게시판 목록을 보여줍니다.
@@ -1083,10 +1085,12 @@
    
 ### 글 수정
 > 내가 작성한 글 정보를 불러와 수정합니다.
-* **화면구현**
-* **기능구현**
-   * BrdController: 수정을 원하는 글의 작성자와 현재 접속한 유저의 정보가 일치하면 데이터를 가져와 출력하고 다르면 홈페이지 메인으로 이동합니다. (view에 '수정' 버튼 활성화 조건을 이미 제시했지만 잘못된 경로로 접속하는것을 방지하기 위해 작성함)
-   ```java
+   * **화면구현**  
+   ![update](https://user-images.githubusercontent.com/86868936/124726581-d9399100-df48-11eb-9bcb-dabee9fc7e83.gif)
+
+   * **기능구현**
+   	* BrdController: 수정을 원하는 글의 작성자와 현재 접속한 유저의 정보가 일치하면 데이터를 가져와 출력하고 다르면 홈페이지 메인으로 이동합니다. (view에 '수정' 버튼 활성화 조건을 이미 제시했지만 잘못된 경로로 접속하는것을 방지하기 위해 작성함)
+   	```java
 	//수정페이지 들어가기
 	@RequestMapping(value="/modify",method = RequestMethod.GET)
 	public String modifyGET(@ModelAttribute("nav")String nav,String mid,String post,
@@ -1116,15 +1120,17 @@
 		}
 		return "board/modify";
 	}
-   ```
+  	 ```	
 ---  
    
 ### 글 삭제
 > 본인이 작성한 글을 삭제할 수 있습니다.
-* **화면구현**
-* **기능구현**
-   * BrdController: 삭제시 해당 게시물에 첨부파일이 있으면 먼저 실존 파일을 삭제한 후 글을 삭제합니다.
-   ```java
+   * **화면구현**  
+   ![delete](https://user-images.githubusercontent.com/86868936/124726622-e0f93580-df48-11eb-9799-dbb78d5e57f6.gif)
+
+   * **기능구현**
+   	* BrdController: 삭제시 해당 게시물에 첨부파일이 있으면 먼저 실존 파일을 삭제한 후 글을 삭제합니다.
+   	```java
 	//게시물삭제	
 	@RequestMapping(value="/remove", method=RequestMethod.POST)
 	@ResponseBody
@@ -1147,15 +1153,17 @@
 			System.out.println(e.getMessage());
 		}		
 	}	
-   ```
+   	```
 ---
 
 ### 답글 쓰기
 > 게시글 테이블에 post_group, post_step, post_indent 컬럼 값을 변경해 답글을 구분합니다.
-* **화면구현**
-* **기능구현**
-   * 게시글의 답글: post_group이 동일한 데이터 중 step의 최고값+1, indent+1
-   * 답글의 답글: step이 동일한 데이터 중 indent의 최고값+1로 처리합니다.
+   * **화면구현**  
+   ![image](https://user-images.githubusercontent.com/86868936/124757421-866fd180-df68-11eb-8829-d6a38de23352.png)
+
+   * **기능구현**
+  	 * 게시글의 답글: post_group이 동일한 데이터 중 step의 최고값+1, indent+1
+  	 * 답글의 답글: step이 동일한 데이터 중 indent의 최고값+1로 처리합니다.
    ```java
    <!-- boardMapper.xml-->
 	<!-- 게시글 답글 등록 -->
@@ -1181,10 +1189,12 @@
 
 ### 게시물 읽기
 > 선택한 게시물의 정보를 보여주며 이전글/다음글, 첨부파일 다운로드, 댓글 CURD 기능이 존재합니다.
-* **화면구현**
-* **기능구현**
 **1. 이전글/ 다음글**
-   * boardMapper.xml: 현재 게시물과 조건에 맞는 이전글(prev)과 다음글(next) 페이지 번호를 담아 같이 출력합니다.
+  * **화면구현**  
+  ![prev_next](https://user-images.githubusercontent.com/86868936/124758471-94722200-df69-11eb-9513-f66c079e7740.gif)
+  
+  * **기능구현**
+   	* boardMapper.xml: 현재 게시물과 조건에 맞는 이전글(prev)과 다음글(next) 페이지 번호를 담아 같이 출력합니다.
 	```java
 	<!-- 공지사항 글보기 -->
 	<select id="readNoticePage" resultMap="boardMap" resultType="BrdVO">
@@ -1196,27 +1206,31 @@
 	</select>
 	```
 **2. 첨부파일 목록/ 다운로드**
-   * UploadController: 첨부된 파일 목록이 표시되며 첨부 파일 클릭시 RESTful로 접속해 다운로드 합니다.
-   * 첨부파일 목록  		 
-```java
-	//UploadController
-	//첨부파일 불러오기 : 게시물 번호를 받아 첨부파일 데이터를 json으로 반환
-	@GetMapping("/getAttachList")	
-	public @ResponseBody ResponseEntity<List<BoardAttachVO>> loadFile(String nav,String postId) throws Exception{
-		logger.info("loadFile");
-		Map<String,Object> map=new HashMap<String,Object>();
-		List<BoardAttachVO> list = new ArrayList<>();
-		try {
-			map.put("nav",nav);
-			map.put("postId",postId);		
-			list=fileDAO.getAttachList(map);
-		}catch(UnsupportedEncodingException e){
-			e.printStackTrace();
+  * **화면구현**  
+  ![download](https://user-images.githubusercontent.com/86868936/124758521-9e942080-df69-11eb-972d-89bc1e00ea86.gif)
+  
+  * **기능구현**
+  	* 첨부파일 목록 (UploadController)
+   	* 첨부된 파일 목록이 표시되며 첨부 파일 클릭시 RESTful로 접속해 다운로드 합니다.   	 		 
+	```java
+		//UploadController
+		//첨부파일 불러오기 : 게시물 번호를 받아 첨부파일 데이터를 json으로 반환
+		@GetMapping("/getAttachList")	
+		public @ResponseBody ResponseEntity<List<BoardAttachVO>> loadFile(String nav,String postId) throws Exception{
+			logger.info("loadFile");
+			Map<String,Object> map=new HashMap<String,Object>();
+			List<BoardAttachVO> list = new ArrayList<>();
+			try {
+				map.put("nav",nav);
+				map.put("postId",postId);		
+				list=fileDAO.getAttachList(map);
+			}catch(UnsupportedEncodingException e){
+				e.printStackTrace();
+			}
+			return new ResponseEntity<>(list,HttpStatus.OK);
 		}
-		return new ResponseEntity<>(list,HttpStatus.OK);
-	}
-```
-   * 첨부파일 다운로드
+	```
+   	* 첨부파일 다운로드 (UploadController)
     	* aws s3에 있는 파일에 접속하기 위해서 파일 위치 url클래스 객체 생성 후 url.openConnection()로 URLConnection 추상클래스 객체를 생성한다.
     	* 프로토콜에 맞춰 하위 클래스의 인스턴스를 얻고(HttpURLConnection) InputStream으로 값을 반환 시킵니다.
     	* HttpHeaders에 'user-Agent'로 접속한 웹브라우저에 따라 파일 이름 인코딩을 한 후 HttpHeader에 파일이름과 경로를 넣어 다운로드 가능하게 합니다. 
@@ -1259,8 +1273,10 @@
 
 ### 댓글기능
 > 각 게시물에 댓글 읽기(리스트), 등록, 수정, 삭제를 RESTful API로 접근 제공합니다.
-* **화면구현**
-* **기능구현**
+  * **화면구현**  
+  ![reply](https://user-images.githubusercontent.com/86868936/124764603-18c7a380-df70-11eb-8c82-c0902f4599e8.gif)
+
+  * **기능구현**  
  	**1.댓글리스트**: 선택한 게시물의 총 댓글을 가져와 페이징 처리해 ModelAndView로 데이터와 이동하고자 하는 view page를 같이 저장한다.(js에서 받아온 데이터를 정리해 댓글 리스트로 출력해줍니다.)     
      ```java
      	//ReplyController
@@ -1370,7 +1386,8 @@
 
 ### 채팅
 > WebSocket을 사용해 다자간 채팅 기능을 제공합니다.
-* **화면구현**
+* **화면구현**  
+
 * **기능구현**
    *  **채팅방 입장**: 웹소켓을 생성하고 SessionList에 session을 추가합니다. sessionList.size()로 채팅방 접속 인원수를 표시합니다.
 	```java
