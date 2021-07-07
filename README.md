@@ -827,8 +827,8 @@
 
 **2. 목록 개수**
   * **화면구현**  
-  ![list_num](https://user-images.githubusercontent.com/86868936/124703002-6f12f300-df2c-11eb-9ec3-e27f644a5211.JPG)
-	
+  ![pagelist](https://user-images.githubusercontent.com/86868936/124719003-a5a73880-df41-11eb-8a82-f18d629aa042.gif)
+  
   * **기능구현**
   	* brdcate.jsp: 한 페이지 목록 개수 변경에 필요한 값을 주소로 전송하고, UriComponents 클래스를 통해 원하는 url을 생성해서 보여줄 게시물 수를 설정할 수 있습니다.(기본 설정: 10개씩)
 	```java
@@ -906,7 +906,8 @@
 	```
 **5. 검색**
   * **화면구현**
-	
+  ![search](https://user-images.githubusercontent.com/86868936/124719062-b5bf1800-df41-11eb-86a3-815c5f5cbfae.gif)
+  
   * **기능구현**
   	* 리스트 출력 쿼리 안에 `<include refid="search" />`을 넣어 id가 'search'인 쿼리를 넣어 함께 실행합니다.
  	* 검색타입(제목+내용, 제목, 글작성자)에 맞게 해당 게시판 내에서 검색이 가능합니다.
