@@ -639,11 +639,7 @@
 > **전체공지:** 전체 공지 체크 후 글 작성 완료하면 공지 및 커뮤니티 페이지 전체에 공지가 등록됩니다.  
 > **공지글:** 공지 게시판의 공지글로 등록됩니다.
   * **화면구현**  
-  	* 글쓰기 페이지  
-  	![notice_reg2](https://user-images.githubusercontent.com/86868936/124622621-3f290880-deb6-11eb-9a6c-b511208ee63b.JPG)
-	
-	* 공지페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124625211-93cd8300-deb8-11eb-9486-5818e6171081.png)
+   ![image](https://user-images.githubusercontent.com/86868936/124716389-008b6080-df3f-11eb-9919-b89dcabfe80d.png)
   
   * **기능구현**
   	* BrdController: 접속한 유저의 아이디와 닉네임을 가져와 작성된 글을 등록합니다. 전체공지 또는 공지글 체크 안할시 'N'값을 넣어 일반 글 표시를 합니다. 
@@ -702,11 +698,7 @@
 > 각 게시물의 게시판명 표시합니다. 공지 리스트는 전체 공지 목록만 보여줍니다.(최대 5개)   
 > 전체는 커뮤니티에 존재하는 모든 글을 보여주고, 인기글은 조회수 50 이상 또는 댓글 50개 이상인 글만 표시됩니다.
   * **화면구현**  
-	* 전체 페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124627073-35090900-deba-11eb-8a15-6c166c4d4b8a.png)
-	
-	* 인기글 페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124627189-4e11ba00-deba-11eb-8eff-d45db1779cf0.png)
+  ![image](https://user-images.githubusercontent.com/86868936/124714771-27489780-df3d-11eb-9252-3a5e456894d7.png)
 	
   * **기능구현** 
 	* BrdController: 선택한 홈페이지 메뉴 이름,링크(공지,커뮤니티),게시판 메뉴(일상,연예 등), 게시판 이름,전체 및 공지사항 리스트, 페이지 수, 게시물 리스트를 불러옵니다.
@@ -778,11 +770,7 @@
 **3. 게시판/ 카테고리**
 > 게시판 안에 카테고리로 세분화 가능하며 각 글에 카테고리명을 표시합니다. 각 게시판 공지글을 출력합니다. 
   * **화면구현**  
-	* 게시판 페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124626956-186cd100-deba-11eb-9b93-2ea0f75b3dcf.png)
-	
-	* 카테고리 페이지  
-	![image](https://user-images.githubusercontent.com/86868936/124626820-f96e3f00-deb9-11eb-93a7-d095614c23c7.png)
+  ![image](https://user-images.githubusercontent.com/86868936/124714883-49421a00-df3d-11eb-851d-d10db99b63d5.png)
 
   * **기능구현** 
   	* boardMapper.xml
@@ -875,7 +863,7 @@
 **4. 게시물 날짜, 첨부파일 여부, 댓글 수, 답글 정렬, 페이징 기능**
   * **화면구현**
    	* **게시물 날짜, 첨부파일 여부, 댓글 수, 답글 정렬**  
-  	![image](https://user-images.githubusercontent.com/86868936/124710499-d71b0680-df37-11eb-85c1-815515602b1b.png)
+  	![image](https://user-images.githubusercontent.com/86868936/124711661-50672900-df39-11eb-8e09-cfb0b64e7998.png)
 	
 	* **페이징**
 	![page](https://user-images.githubusercontent.com/86868936/124710697-15b0c100-df38-11eb-92b1-0b58a6ae2724.gif)
