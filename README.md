@@ -36,10 +36,10 @@
 ## 화면구성/ 기능구현✨
 
 ### 반응형 웹
-
-* 접속하는 디스플레이 접속 기기의 화면 크기를 자동으로 변하게 반응형으로 제작하였습니다.
+> 접속하는 디스플레이 접속 기기의 화면 크기를 자동으로 변하게 반응형으로 제작하였습니다.
 * **화면구성**
-![responsive](https://user-images.githubusercontent.com/61307201/124218437-2d9dd480-db35-11eb-971e-27160dfceabc.gif)
+![responsive](https://user-images.githubusercontent.com/86868936/124855590-1e5ed100-dfe4-11eb-87ad-443bd3f76900.gif)
+
 ------
 
 ### 메인화면
@@ -99,7 +99,7 @@
 > 불필요한 이동 경로를 줄이기 위해 제공되는 서비스로 커뮤니티 메뉴와 인기 게시판은 DB연결을 통해 값을 가져옵니다.
 > 
   * **화면구성**  
-  ![image](https://user-images.githubusercontent.com/61307201/124342619-111a9e80-dc00-11eb-8d42-2fe98b9ee08c.png)
+  ![image](https://user-images.githubusercontent.com/86868936/124854670-a7750880-dfe2-11eb-91d2-1156aa9ba285.png)
   
   * **기능구현**
   	* HomeController: 커뮤니티 메뉴와 인기게시물을 model에 담아 출력합니다.
@@ -1387,6 +1387,8 @@
 ### 채팅
 > WebSocket을 사용해 다자간 채팅 기능을 제공합니다.
 * **화면구현**  
+![chatting](https://user-images.githubusercontent.com/86868936/124860600-dee8b280-dfec-11eb-884b-0e06afe0efcb.gif)
+
 
 * **기능구현**
    *  **채팅방 입장**: 웹소켓을 생성하고 SessionList에 session을 추가합니다. sessionList.size()로 채팅방 접속 인원수를 표시합니다.
@@ -1474,7 +1476,9 @@
 > 마이페이지 내에 기능을 사용하려면 비밀번호를 한번 더 입력해야합니다. ModelAndView로 값과 주소를 전달하기 때문에 새로고침시 마이페이지로 이동합니다.
 **1. 회원정보수정**
 > 비밀번호, 닉네임, 이메일, 전화번호, 주소를 수정할 수 있습니다.
-  * **화면구현**
+  * **화면구현**  
+  ![myinfo](https://user-images.githubusercontent.com/86868936/124860685-0770ac80-dfed-11eb-9733-693e7c57be38.gif)
+  
   * **기능구현**
   	* MemberController: 정보 수정을 각각 따로 받아 처리하기 위해 받아오는 값이 null이 아닌 것을 찾아 수정합니다.	
   ```java
@@ -1510,7 +1514,13 @@
   ```
 **2. 게시물관리/ 댓글관리**
 > 내가 쓴 게시물 제목, 댓글 을 확인할 수 있으며 선택 후 삭제 가능합니다.
-  * **화면구현**
+  * **화면구현**  
+  	* 게시물관리
+  	![myboard](https://user-images.githubusercontent.com/86868936/124865716-23c51700-dff6-11eb-8980-b72a5a4449eb.gif)
+	
+	* 댓글관리
+	![myreply](https://user-images.githubusercontent.com/86868936/124865745-35a6ba00-dff6-11eb-8810-49de90a12459.gif)
+
   * **기능구현**
   	* MemberController 
   		* 리스트: 접속한 유저 정보를 가져와 해당 유저가 작성한 모든 글을 페이징해서 ModelAndView로 전송합니다.
@@ -1590,6 +1600,8 @@
 > 탈퇴시 사용자 권한을 변경해 계정의 아이디와 이메일, 닉네임을 사용할 수 없습니다. 7일 이후 모든 정보가 삭제됩니다.
 **1. 회원탈퇴 클릭시**
   * **화면구현**
+  
+  
   * **기능구현**
    	* MemberController: 현재 접속된 계정의 정보를 가져와 탈퇴처리 후 결과 값(1)을 전송합니다.
 	  ```java
