@@ -49,20 +49,6 @@ public class AwsS3 {
     
     public static AwsS3 getInstance() {
         if (instance == null) {
-        	//컨테이너 생성 및 xml 파일 로드
-//        	GenericXmlApplicationContext ctx = new GenericXmlApplicationContext();
-//        	ctx.load("classpath:key-config.xml");
-//    		ctx.refresh();
-//    		// 빈 객체 받아오기
-//    		DataVO key = (DataVO) ctx.getBean("awsSource");
-//    		
-//    		// 프로퍼티 값 확인
-//    		System.out.println(key.getAccessKey());
-//    		System.out.println(key.getSecretKey());
-//    		accessKey=key.getAccessKey();
-//    		secretKey=key.getSecretKey();
-//    		bucket=key.getBucket();
-    		
             return new AwsS3();
         } else {
             return instance;

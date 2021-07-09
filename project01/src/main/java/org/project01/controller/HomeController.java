@@ -36,13 +36,12 @@ public class HomeController {
 		logger.info("메인 페이지");	
 		try {
 			//커뮤니티 메뉴(일상,뷰티 등)
-			model.addAttribute("brdNameList",brdDAO.brdNameList("20000"));							
+			model.addAttribute("brdNameList",brdDAO.cmuBrdNameList());	
 			//인기 게시물 출력
 			model.addAttribute("list",brdDAO.mainHotList());
-			System.out.println(model);
 		}catch(Exception e){
 			System.out.println(e.getMessage());
-		}
+		}		
 		return "home";
 	}
 	@PostMapping("/sideNav")

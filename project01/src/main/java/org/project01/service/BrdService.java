@@ -55,6 +55,6 @@ public interface BrdService {
 	//첨부파일 리스트
 	public List<BoardAttachVO> getAttachList(Map<String,Object> map) throws Exception;
 
-	public List<Map<String,String>> brdNameListNon() throws Exception;
+	public List<Map<String,String>> cmuBrdNameList() throws Exception;
 
 }

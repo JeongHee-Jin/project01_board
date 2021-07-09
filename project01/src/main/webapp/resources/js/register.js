@@ -85,10 +85,8 @@ $(document).ready(function() {
 			if(!checkExtension(files[i].name, files[i].size)){
 				return false;
 			}
-			console.log(files[i]);
 			formData.append("uploadFile", files[i]);
 		}
-		console.log(formData);
 		$.ajax({
 			url : '/uploadAws',
 			processData : false,

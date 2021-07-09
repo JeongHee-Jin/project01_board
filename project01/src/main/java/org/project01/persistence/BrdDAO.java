@@ -64,7 +64,7 @@ public interface BrdDAO {
 	public void updateReplyCnt(Map<String, Object> map) throws Exception;
 	
 	//게시판 전체
-	public List<Map<String, String>> brdNameListNon() throws Exception;
+	public List<Map<String, String>> cmuBrdNameList() throws Exception;
 	//메인페이지 인기게시물 5개
 	public List<Map<String, String>> mainHotList() throws Exception;
 

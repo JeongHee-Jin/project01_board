@@ -63,8 +63,7 @@ public class WebSocketChat{
 	
 	//채팅방인원수
 	@PostMapping("/size")
-	@ResponseBody
-	public int listSize()  throws Exception{
+	public @ResponseBody int listSize()  throws Exception{
 		System.out.println("인원수 : "+sessionList.size());
 		return sessionList.size();		
 	}

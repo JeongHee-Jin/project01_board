@@ -155,10 +155,10 @@ function joinFunction(){
 	var code=null;
 	email.onkeyup=function(){
 		code=null;
-		if(code_regul_div.innerHTML!=""){
+	/*	if(code_regul_div.innerHTML!=""){
 			code_regul_div.innerHTML="인증코드가 다릅니다.";
 			code_regul_div.classList.remove('green');
-		}
+		}*/
 		if(!em_regul2.test(email.value)){
 			if((email.value)==''){
 				email_regul.innerHTML="필수 입력입니다.";

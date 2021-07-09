@@ -143,6 +143,7 @@ public class AdminController {
 		}
 		return map;
 	}
+	
 	@PostMapping("/addBoardName")	
 	public @ResponseBody int addBoardName(int brdMenuIdx,String brdName,int menuIdx) 
 			throws Exception {
@@ -158,8 +159,7 @@ public class AdminController {
 			System.out.println(e.getMessage());
 		}
 		return result;
-	}
-	
+	}	
 	
 	@PostMapping("/brdModify")	
 	public @ResponseBody int brdModify(int brdId,String brdValue) throws Exception {
@@ -175,6 +175,7 @@ public class AdminController {
 		}
 		return result;
 	}
+	
 	@PostMapping("/brdDelete")	
 	public @ResponseBody int brdDelete(int brdId) throws Exception {
 		logger.info("게시판 삭제하기");

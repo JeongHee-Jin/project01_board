@@ -34,14 +34,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="next" column="next" />
 	</resultMap>
 	<!-- #{} :?/'값' ${} : 값 -->
-	<!--  -->
+	<!-- 메인화면 인기글 -->
 	<select id="mainHotList" resultType="hashmap">
 		<![CDATA[select post_Idx,brd_Idx,post_title from(
-			select  bp.*,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
+			select bp.*,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt 
 			from board_post_20000 bp order by post_idx desc)
 			where post_notice='N' and post_hit>=50 or reply_cnt>=50 and rownum <=5]]>
 	</select>
-	
 	
 	<!-- 홈페이지 메뉴 이름 -->
 	<select id="tabMenuName" resultType="String">
@@ -54,7 +53,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<!-- 공지 게시판 : notice-->
-	<select id="listSearchNotice" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<select id="noticeBoardSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 	<![CDATA[select b.*,d.cate_name,(select count(*) from board_attach_10000 ba where ba.post_idx=b.post_idx)as fileY
 		 from(
 			select a.* from(
@@ -66,7 +65,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx(+) order by rn DESC]]>
     </select>
 	<!-- 공지 게시판 카테고리 : notice-->
-	<select id="listSearchNotice2" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<select id="noticeCateSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 	<![CDATA[select b.*,d.cate_name,(select count(*) from board_attach_10000 ba where ba.post_idx=b.post_idx)as fileY from(
 		select a.* from(
 		select rownum rn,p.* from( /*+INDEX_DESC(board_post_${nav})*/ 
@@ -78,7 +77,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 		
 	<!-- 게시판 : total-->
-	<select id="listSearchTotal" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<select id="cmuTotalSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 		 <![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname, 
 			b.post_notice, b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
 			DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
@@ -111,7 +110,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]> -->
 	
 	<!-- 게시판 : hot --><!-- resultType은 select구문에서만 존재 -->
-	<select id="listSearchHot" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<select id="cmuHotSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 	<![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
         b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,c.brd_name, 
 		DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
@@ -128,8 +127,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
        	 	where rownum <= #{cri.page} * #{cri.pageLen} and post_idx > 0 and post_hit>=50 or reply_cnt>=50) b , board_list c
        	 where rn > (#{cri.page} -1) * #{cri.pageLen} and b.brd_idx=c.brd_idx order by rn]]>
 	</select>
-	<!-- 게시판2 : 게시판 클릭-->
-	<select id="listSearch2" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<!-- 게시판 : 게시판 클릭-->
+	<select id="cmuBoardSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 	<![CDATA[select b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
         b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,d.cate_name, 
 		DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
@@ -147,8 +146,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
        	 where rn > (#{cri.page} -1) * #{cri.pageLen} and b.cate_idx=d.cate_idx(+) order by rn]]>
 	</select>
 	
-	<!-- 게시판3 : 게시판 말머리 클릭 -->
-	<select id="listSearch3" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
+	<!-- 게시판 : 카테고리 클릭 -->
+	<select id="cmuCateSearch" resultType="BrdVO" resultMap="boardMap" parameterType="hashmap">
 	<![CDATA[select  b.post_Idx,b.brd_Idx,b.cate_Idx,b.post_title,b.post_content,b.mem_id,b.mem_nickname,b.post_notice,
         b.post_hit,b.post_group,b.post_step,b.post_indent,b.reply_cnt,d.cate_name, 
 		DECODE(TO_CHAR(b.post_regtime,'YYYY.MM.DD'),TO_CHAR(sysdate,'YYYY.MM.DD'),TO_CHAR(b.post_regtime,'HH24:MI')
@@ -166,13 +165,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<!-- total 게시판 게시물수 -->
-	<select id="listSearchCntTotal" resultType="int" >
+	<select id="cmuTotalSearchCnt" resultType="int" >
 		select count(post_idx) from board_post_${nav} where post_notice='N' 
 		<include refid="search" />
 		and post_idx > 0
 	</select>
 	<!-- hot 게시판 게시물수 -->
-	<select id="listSearchCntHot" resultType="int" >
+	<select id="cmuHotSearchCnt" resultType="int" >
 		select count(*) from(
 			select bp.*,(select count(*)from reply_20000 rp where bp.post_idx=rp.post_idx) reply_cnt from board_post_20000 bp)
 			where post_notice='N'  
@@ -180,27 +179,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			and post_idx > 0 and post_hit>=50 or reply_cnt>=50
 	</select>
 	<!-- 공지 총게시물수 -->
-	<select id="noticeSearchCnt2" resultType="int" >
+	<select id="noticeBoardSearchCnt" resultType="int" >
 		select count(post_idx) from board_post_${nav} where brd_idx=${mid} 
 		<include refid="search" />
 		and post_idx > 0
 	</select>
 	
 	<!-- 공지 카테고리 총게시물수 -->
-	<select id="noticeSearchCnt3" resultType="int" >
+	<select id="noticeCateSearchCnt" resultType="int" >
 		select count(post_idx) from board_post_${nav} where cate_idx=${sub}  
 		<include refid="search" />
 		and post_idx > 0
 	</select>
 	<!-- 게시판(ex:공부) 총게시물수 -->
-	<select id="listSearchCnt2" resultType="int" >
+	<select id="cmuBoardSearchCnt" resultType="int" >
 		select count(post_idx) from board_post_${nav} where brd_idx=${mid} and post_notice='N' 
 		<include refid="search" />
 		and post_idx > 0
 	</select>
 	
 	<!-- 카테고리(ex:어학) 총게시물수 -->
-	<select id="listSearchCnt3" resultType="int" >
+	<select id="cmuCateSearchCnt" resultType="int" >
 		select count(post_idx) from board_post_${nav} where cate_idx=${sub} and post_notice='N' 
 		<include refid="search" />
 		and post_idx > 0
@@ -236,19 +235,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<!-- 공지사항 : 전체공지 -->
-	<select id="noticeListT" resultType="BrdVO" resultMap="boardMap">
+	<select id="noticeListTotal" resultType="BrdVO" resultMap="boardMap">
 		<![CDATA[select b.*,(select count(*) from board_attach_10000 ba where ba.post_idx(+)=b.post_idx)as fileY 
 		from board_post_10000 b where post_notice='T' and rownum<=5 order by post_idx desc]]>
 	</select>
 	<!-- 게시판별 공지 -->
-	<select id="noticeListB" resultType="BrdVO" resultMap="boardMap">
+	<select id="noticeListBoard" resultType="BrdVO" resultMap="boardMap">
 		<![CDATA[select bp.*,bc.cate_name,(select count(*) from board_attach_20000 ba where ba.post_idx(+)=bp.post_idx)as fileY 
 		from ( select *from board_post_${nav} where post_notice='Y' and brd_idx=#{mid} )bp, brd_category bc 
 		where bp.cate_idx=bc.cate_idx(+) and rownum<=5 order by post_idx desc ]]>
 	</select>
 		
 	<!-- register : 글쓰기 (공지,커뮤니티)-->
-	<insert id="createPage1" parameterType="BrdVO">
+	<insert id="createNoticePage" parameterType="BrdVO">
 	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
 			select board_post_${nav}_seq.currval as postId from dual
 		</selectKey>
@@ -257,7 +256,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		values (board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
 		#{title},#{content},#{memId},#{memNickName},#{notice})
 	</insert>
-	<insert id="createPage2" parameterType="BrdVO">
+	<insert id="createCmuPage" parameterType="BrdVO">
 	 	<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
 			select board_post_${nav}_seq.currval as postId from dual
 		</selectKey>
@@ -267,10 +266,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		#{title},#{content},#{memId},#{memNickName},#{notice},board_post_${nav}_seq.currval)
 	</insert>
 
-	<select id="boardCnt1" resultType="int">
+	<select id="postTotalCnt" resultType="int">
 		select count(post_idx) from board_post_${nav}
 	</select>
-	<select id="boardCnt2" resultType="int">
+	<select id="boardSelCnt" resultType="int">
 		select count(post_idx) from board_post_${nav} where brd_idx=${mid}
 	</select>
 	<!-- readPage : 게시글 보기 :게시물이 1개일때-->
@@ -279,7 +278,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<!-- select * from  board_post_${nav} where post_idx=#{postId} -->
 	</select>
 	<!-- 공지사항 글보기 -->
-	<select id="readPageNotice" resultMap="boardMap" resultType="BrdVO">
+	<select id="readNoticePage" resultMap="boardMap" resultType="BrdVO">
 	<![CDATA[
 		select bp.* ,prev,next from board_post_${nav} bp,
 		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} ORDER BY post_idx ASC ) a full outer join 
@@ -287,7 +286,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	 	on a.prev != b.next where post_idx=#{postId} and rownum = 1 ]]>
 	</select>
 	<!-- 공지사항 카테고리 글보기 -->
-	<select id="readPageNoticeSub" resultMap="boardMap" resultType="BrdVO">
+	<select id="readNoticeSubPage" resultMap="boardMap" resultType="BrdVO">
 	<![CDATA[
 		select bp.* ,prev,next from  board_post_${nav} bp,
 		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} ORDER BY post_idx ASC ) a 
@@ -296,7 +295,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	 	on a.prev != b.next where post_idx=#{postId} and bp.cate_idx=#{sub} and rownum = 1 ]]>
 	</select>
 	<!-- 게시글 보기 : total-->
-	<select id="readPageTotal" resultMap="boardMap" resultType="BrdVO">
+	<select id="readTotalPage" resultMap="boardMap" resultType="BrdVO">
 	<![CDATA[
 		select bp.* ,prev,next from board_post_${nav} bp,
 		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} and post_notice='N' ORDER BY post_idx ASC ) a 
@@ -305,7 +304,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	 	on a.prev != b.next where post_idx=#{postId} and rownum = 1 ]]>
 	</select>
 	<!-- 게시글 보기 : Hot-->
-	<select id="readPageHot" resultMap="boardMap" resultType="BrdVO">
+	<select id="readHotPage" resultMap="boardMap" resultType="BrdVO">
 	<![CDATA[
 		select bp.*,prev,next from board_post_20000 bp,
 			(select post_idx prev from board_post_20000, 
@@ -318,7 +317,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	 	on a.prev != b.next where post_idx=#{postId} and rownum = 1]]>
 	</select>
 	<!-- 게시글 보기 : 게시판글-->
-	<select id="readPageMid" resultMap="boardMap" resultType="BrdVO">
+	<select id="readMidPage" resultMap="boardMap" resultType="BrdVO">
 	<![CDATA[
 		select bp.*,prev,next from  board_post_${nav} bp,
 		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} and brd_idx=#{mid} ORDER BY post_idx ASC ) a 
@@ -327,7 +326,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	 	on a.prev != b.next where post_idx=#{postId} and bp.brd_idx=#{mid} and rownum = 1 ]]>
 	</select>
 	<!-- 게시글 보기 : 말머리글-->
-	<select id="readPageSub" resultMap="boardMap" resultType="BrdVO">
+	<select id="readSubPage" resultMap="boardMap" resultType="BrdVO">
 	<![CDATA[
 		select bp.*, prev,next from  board_post_${nav} bp,
 		(SELECT post_idx prev FROM board_post_${nav} WHERE post_idx > #{postId} and cate_idx=#{sub} ORDER BY post_idx ASC ) a 
@@ -351,7 +350,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <!-- 	<select id="cateNameList" resultType="hashmap">
 		select bca_id,bca_name from board_category where brd_key=${value} order by bca_id
 	</select> -->
-	<select id="brdNameListNon" resultType="hashmap">
+	<select id="cmuBrdNameList" resultType="hashmap">
 		select * from board_list where brd_idx!=100
 	</select>
 	<select id="brdNameListCla" resultType="hashmap">
@@ -380,7 +379,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 	
 	<!-- 게시글 답글 등록 -->
-	<insert id="commentaire" parameterType="BrdVO">
+	<insert id="commentaireStep" parameterType="BrdVO">
 		<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
 			select board_post_${nav}_seq.currval as postId from dual
 		</selectKey>
@@ -390,14 +389,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	#{title},#{content},#{memId},#{memNickName},#{group},(select max(post_step)+1 from board_post_${nav} where post_group=#{group}),#{indent}+1)]]>
 	</insert>
 		
-	<insert id="commentaire2" parameterType="BrdVO">
+	<insert id="commentaireIndent" parameterType="BrdVO">
 		<selectKey resultType="Integer" keyProperty="postId" order="AFTER">
 			select board_post_${nav}_seq.currval as postId from dual
 		</selectKey>
 	<![CDATA[insert into board_post_${nav}
-	(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_group,post_step,post_indent)
+		(post_idx,brd_idx,cate_idx,post_title,post_content,mem_id,mem_nickname,post_group,post_step,post_indent)
 	values(board_post_${nav}_seq.nextval,#{brdId},#{cateId,jdbcType=VARCHAR},
-	#{title},#{content},#{memId},#{memNickName},#{group},#{step},(select max(post_indent)+1 from board_post_${nav} where post_step=#{step}))]]>
+		#{title},#{content},#{memId},#{memNickName},#{group},#{step},(select max(post_indent)+1 
+	from board_post_${nav} where post_group=#{group} and post_step=#{step}))]]>
 	</insert>
 	
 	<update id="updateCommentaire" parameterType="map">
@@ -454,7 +454,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="myReplyCnt" resultType="int">
 		select count(post_idx) from reply_20000 where mem_id=#{userId} and post_idx > 0
 	</select>
-	<!-- 내가 쓴 게시물 삭제 -->
+	<!-- 내가 쓴 댓글 삭제 -->
 	<delete id="myReplyDel" parameterType="java.util.List">
 		delete from reply_20000 
 		<where>

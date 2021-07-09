@@ -26,9 +26,9 @@ public class BrdDAOImpl implements BrdDAO {
 	// 게시판리스트1
 	public List<BrdVO> listPageCri(Map<String, Object> map) throws Exception {
 		if (map.get("cla").equals("1100")) {
-			return sqlSession.selectList(namespace + ".listSearchTotal", map);
+			return sqlSession.selectList(namespace + ".cmuTotalSearch", map);
 		} else {
-			return sqlSession.selectList(namespace + ".listSearchHot", map);
+			return sqlSession.selectList(namespace + ".cmuHotSearch", map);
 		}
 
 	}
@@ -38,16 +38,16 @@ public class BrdDAOImpl implements BrdDAO {
 	public List<BrdVO> listPageCri2(Map<String, Object> map) throws Exception {
 		if (map.get("nav").equals("10000") && map.containsKey("mid")) {
 			System.out.println("공지리스트");
-			return sqlSession.selectList(namespace + ".listSearchNotice", map);
+			return sqlSession.selectList(namespace + ".noticeBoardSearch", map);
 		} else if (map.get("nav").equals("10000")) {
 			System.out.println("공지리스트 - 카테고리");
-			return sqlSession.selectList(namespace + ".listSearchNotice2", map);
+			return sqlSession.selectList(namespace + ".noticeCateSearch", map);
 		} else if (map.get("nav").equals("20000") && map.containsKey("mid")) {
 			System.out.println("게시판리스트");
-			return sqlSession.selectList(namespace + ".listSearch2", map);
+			return sqlSession.selectList(namespace + ".cmuBoardSearch", map);
 		} else {
 			System.out.println("게시판-카테고리");
-			return sqlSession.selectList(namespace + ".listSearch3", map);
+			return sqlSession.selectList(namespace + ".cmuCateSearch", map);
 		}
 	}
 
@@ -55,9 +55,9 @@ public class BrdDAOImpl implements BrdDAO {
 	@Override
 	public int listPageCnt(Map<String, Object> map) throws Exception {
 		if (map.get("cla").equals("1100")) {
-			return sqlSession.selectOne(namespace + ".listSearchCntTotal", map);
+			return sqlSession.selectOne(namespace + ".cmuTotalSearchCnt", map);
 		} else {
-			return sqlSession.selectOne(namespace + ".listSearchCntHot", map);
+			return sqlSession.selectOne(namespace + ".cmuHotSearchCnt", map);
 		}
 	}
 
@@ -66,15 +66,15 @@ public class BrdDAOImpl implements BrdDAO {
 	public int listPageCnt2(Map<String, Object> map) throws Exception {
 		if(map.get("nav").equals("10000")) {
 			if (map.containsKey("mid")) {
-				return sqlSession.selectOne(namespace + ".noticeSearchCnt2", map);
+				return sqlSession.selectOne(namespace + ".noticeBoardSearchCnt", map);
 			} else {
-				return sqlSession.selectOne(namespace + ".noticeSearchCnt3", map);
+				return sqlSession.selectOne(namespace + ".noticeCateSearchCateCnt", map);
 			}
 		}else {
 			if (map.containsKey("mid")) {
-				return sqlSession.selectOne(namespace + ".listSearchCnt2", map);
+				return sqlSession.selectOne(namespace + ".cmuBoardSearchCnt", map);
 			} else {
-				return sqlSession.selectOne(namespace + ".listSearchCnt3", map);
+				return sqlSession.selectOne(namespace + ".cmuCateSearchCnt", map);
 			}
 		}
 	}
@@ -82,13 +82,13 @@ public class BrdDAOImpl implements BrdDAO {
 	// 전체공지글출력
 	@Override
 	public List<BrdVO> noticeList(String nav) throws Exception {
-		return sqlSession.selectList(namespace + ".noticeListT", nav);
+		return sqlSession.selectList(namespace + ".noticeListTotal", nav);
 	}
 
 	// 게시판별 공지글 출력
 	@Override
 	public List<BrdVO> noticeList2(Map<String, Object> map) {
-		return sqlSession.selectList(namespace + ".noticeListB", map);
+		return sqlSession.selectList(namespace + ".noticeListBoard", map);
 	}
 
 	// 글쓰기
@@ -96,9 +96,9 @@ public class BrdDAOImpl implements BrdDAO {
 	public void create(BrdVO vo) throws Exception {
 		System.out.println("글쓰기 ");
 		if (vo.getNav() == 10000) {
-			sqlSession.insert(namespace + ".createPage1", vo);
+			sqlSession.insert(namespace + ".createNoticePage", vo);
 		} else if (vo.getNav() == 20000) {
-			sqlSession.insert(namespace + ".createPage2", vo);
+			sqlSession.insert(namespace + ".createCmuPage", vo);
 		}
 		if (vo.getAttachList() == null || vo.getAttachList().size() <= 0) {
 			return;
@@ -134,7 +134,7 @@ public class BrdDAOImpl implements BrdDAO {
 	public BrdVO readNotice(Map<String, Object> map) throws Exception {
 		BrdVO vo = new BrdVO();		
 		// 글 수
-		int a = sqlSession.selectOne(namespace + ".boardCnt1", map);
+		int a = sqlSession.selectOne(namespace + ".postTotalCnt", map);
 		System.out.println(map);
 		// 게시물이 없을때
 		if (a == 1) {
@@ -143,10 +143,10 @@ public class BrdDAOImpl implements BrdDAO {
 		} else if (map.containsKey("sub")) {
 			if (map.get("sub").equals("")) {
 				System.out.println("공지:게시판-게시물");
-				vo = sqlSession.selectOne(namespace + ".readPageNotice", map);
+				vo = sqlSession.selectOne(namespace + ".readNoticePage", map);
 			} else {
 				System.out.println("공지:카테고리-게시물");
-				vo = sqlSession.selectOne(namespace + ".readPageNoticeSub", map);
+				vo = sqlSession.selectOne(namespace + ".readNoticeSubPage", map);
 			}
 		} else {
 			System.out.println("게시판수정");
@@ -169,17 +169,17 @@ public class BrdDAOImpl implements BrdDAO {
 	public BrdVO readCmu1(Map<String, Object> map) throws Exception {
 		BrdVO vo = new BrdVO();
 		// 글 수
-		int cnt = sqlSession.selectOne(namespace + ".boardCnt1", map);
+		int cnt = sqlSession.selectOne(namespace + ".postTotalCnt", map);
 		// 게시물이 없을때
 		if (cnt == 1) {
 			vo = sqlSession.selectOne(namespace + ".readPage", map);
 		} else if (map.containsKey("cla")) {
 			if (map.get("cla").equals("1100")) {
 				System.out.println("커뮤니티:전체-게시물"+map);	
-				vo = sqlSession.selectOne(namespace + ".readPageTotal", map);
+				vo = sqlSession.selectOne(namespace + ".readTotalPage", map);
 			} else {
 				System.out.println("커뮤니티:인기-게시물");
-				vo = sqlSession.selectOne(namespace + ".readPageHot", map);
+				vo = sqlSession.selectOne(namespace + ".readHotPage", map);
 			}
 		} else {
 			System.out.println("게시판수정");
@@ -193,16 +193,16 @@ public class BrdDAOImpl implements BrdDAO {
 	public BrdVO readCmu2(Map<String, Object> map) throws Exception {
 		BrdVO vo = new BrdVO();
 		// 글 수
-		int cnt = sqlSession.selectOne(namespace + ".boardCnt2", map);
+		int cnt = sqlSession.selectOne(namespace + ".boardSelCnt", map);
 		if (cnt == 1) {
 			vo = sqlSession.selectOne(namespace + ".readPage", map);
 		} else if (map.containsKey("sub")) {
 			if (map.get("sub").equals("")) {
 				System.out.println("커뮤니티:게시판-게시물");
-				vo = sqlSession.selectOne(namespace + ".readPageMid", map);
+				vo = sqlSession.selectOne(namespace + ".readMidPage", map);
 			} else {
 				System.out.println("커뮤니티:카테고리-게시물");
-				vo = sqlSession.selectOne(namespace + ".readPageSub", map);
+				vo = sqlSession.selectOne(namespace + ".readSubPage", map);
 			}
 		} else {
 			System.out.println("게시판수정");
@@ -238,21 +238,18 @@ public class BrdDAOImpl implements BrdDAO {
 	// 게시물 삭제
 	@Override
 	public void delete(BrdVO vo) throws Exception {
-		System.out.println("글삭제 : "+vo);
+		System.out.println("글삭제  ");
 		sqlSession.delete(namespace + ".deletePage", vo);
 	}
 
 	// 답글 등록
 	@Override
 	public void insertCommentaire(BrdVO vo) throws Exception {
-		System.out.println("답글 : " + vo);
 		if (vo.getStep() == 0) {
-			System.out.println("step 0");
 			vo.setGroup(vo.getPostId());
-			sqlSession.insert(namespace + ".commentaire", vo);
+			sqlSession.insert(namespace + ".commentaireStep", vo);
 		} else {
-			System.out.println("step !0");
-			sqlSession.insert(namespace + ".commentaire2", vo);
+			sqlSession.insert(namespace + ".commentaireIndent", vo);
 		}
 		if (vo.getAttachList() == null || vo.getAttachList().size() <= 0) {
 			return;
@@ -304,12 +301,12 @@ public class BrdDAOImpl implements BrdDAO {
 		sqlSession.selectOne(namespace + ".updateReplyCnt", map);
 	}
 	
-
+	//커뮤니티 전체 메뉴 리스트
 	@Override
-	public List<Map<String, String>> brdNameListNon() throws Exception {
-		return sqlSession.selectList(namespace + ".brdNameListNon");
+	public List<Map<String, String>> cmuBrdNameList() throws Exception {
+		return sqlSession.selectList(namespace + ".cmuBrdNameList");
 	}
-
+	//메인페이지 인기게시물 5개
 	@Override
 	public List<Map<String, String>> mainHotList() throws Exception {
 		return sqlSession.selectList(namespace + ".mainHotList");

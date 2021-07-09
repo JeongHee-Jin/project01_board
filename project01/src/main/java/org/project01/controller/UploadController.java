@@ -74,24 +74,17 @@ public class UploadController {
 				String uploadFileName = multipartFile.getOriginalFilename();
 				
 				uploadFileName = uploadFileName.substring(uploadFileName.lastIndexOf("\\")+1);
-				System.out.println("파일이름 : "+uploadFileName);
 				attachDTO.setFileName(uploadFileName);
-				System.out.println("list3 : "+list);
 				//uuid 넣기
 				UUID uuid = UUID.randomUUID();
 				attachDTO.setFileId(uuid.toString());	
-				System.out.println("list4 : "+list);
 				uploadFileName = uuid.toString() + "_" + uploadFileName;				
 				awsS3.uploadMeta(multipartFile, uploadFolderPath,uploadFileName);
-				System.out.println("attachDTO : "+attachDTO);
-				System.out.println("list1 : "+list);
 				list.add(attachDTO);
-				System.out.println("list2 : "+list);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		logger.info("파일 등록 "+list);
 		return new ResponseEntity<>(list, HttpStatus.OK);
 	}
 	//첨부파일 삭제(글쓰기에서만)
@@ -102,11 +95,28 @@ public class UploadController {
 		logger.info("파일삭제");
 		awsS3.delete(path,targetFile);
 		return new ResponseEntity<String>("deleted", HttpStatus.OK);
+	}
+	
+	//첨부파일 불러오기 : 게시물 번호를 받아 첨부파일 데이터를 json으로 반환하도록 처리
+	@GetMapping("/getAttachList")
+	public @ResponseBody ResponseEntity<List<BoardAttachVO>> loadFile(String nav,String postId) 
+			throws Exception{
+		logger.info("loadFile");
+		Map<String,Object> map=new HashMap<String,Object>();
+		List<BoardAttachVO> list = new ArrayList<>();
+		try {
+			map.put("nav",nav);
+			map.put("postId",postId);		
+			list=fileDAO.getAttachList(map);
+		}catch(UnsupportedEncodingException e){
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(list,HttpStatus.OK);
 	}	
+	
 	//첨부파일 다운로드
-	@ResponseBody
 	@GetMapping(value="/download" ,produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-	public ResponseEntity<byte[]> getFile(@RequestHeader(value="User-Agent")String userAgent,
+	public @ResponseBody ResponseEntity<byte[]> getFile(@RequestHeader(value="User-Agent")String userAgent,
 			String path,String fileName){
 		logger.info("fileName: "+ fileName);
 		ResponseEntity<byte[]> result = null;
@@ -133,31 +143,10 @@ public class UploadController {
 		    result = new ResponseEntity<>(IOUtils.toByteArray(fileIS), header, HttpStatus.OK);
 		  
 		  } catch(IOException e) {
-			 logger.info("wrong file path");
+			 logger.info("file path error");
 		  }
 		  return result;
 	}
-	
-	
-//	//첨부파일 불러오기 : 게시물 번호를 받아 첨부파일 데이터를 json으로 반환하도록 처리
-	@GetMapping("/getAttachList")
-	@ResponseBody
-	public ResponseEntity<List<BoardAttachVO>> loadFile(String nav,String postId) 
-			throws Exception{
-		logger.info("loadFile");
-		Map<String,Object> map=new HashMap<String,Object>();
-		List<BoardAttachVO> list = new ArrayList<>();
-		try {
-			map.put("nav",nav);
-			map.put("postId",postId);		
-			list=fileDAO.getAttachList(map);
-		}catch(UnsupportedEncodingException e){
-			e.printStackTrace();
-		}
-		return new ResponseEntity<>(list,HttpStatus.OK);
-	}	
-	
-
 	
 	//@ResponseBody 처리후 페이지 이동안함
 	//json,xml 메세지 전송

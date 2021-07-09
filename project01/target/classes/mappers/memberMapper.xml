@@ -11,6 +11,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="role" column="mem_role" />
 	</resultMap>
 	<resultMap id="memberMap" type="MemberVO">
+		<result property="userId" column="mem_id" />
 		<result property="userPw" column="mem_pw" />
 		<result property="userNickName" column="mem_nickname" />
 		<result property="phoneNum" column="mem_phoneNum" />

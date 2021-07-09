@@ -127,8 +127,8 @@
 								<input type="file" name="uploadFile" id="uploadFile" multiple>
 							</span>
 							<button title="url" type="button" class="editor_btn URL" id="URL" onclick="createLink();"></button> 
-							<span class="editor_btn btn_html filebox">
-								<input type="button" value="Display" class="btn_html" onclick="showSource();">
+							<span class="editor_btn html_span">
+								<input type="button" class="btn_html" onclick="showSource();">
 							</span> 
 						</span>
 					</div>

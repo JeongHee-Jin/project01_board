@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Project01.BOARD</title>
-<script src="/resources/js/read.js" type="text/javascript"></script>
+<script src="/resources/js/board.js" type="text/javascript"></script>
 <link href="/resources/css/list.css?ver=1" rel="stylesheet" type="text/css" />
 </head>
 <body>

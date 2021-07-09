@@ -83,7 +83,6 @@ public class MemberDAOImpl implements MemberDAO {
 	@Override
 	public int infoModify(Map<String, String> map) throws Exception {
 		int cnt=0;
-		System.out.println("map : "+map);
 		if(map.containsKey("nick")) {
 			cnt=session.update(namespace+".nickModify",map);
 		}else if(map.containsKey("pw")) {

@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.WebAttributes;
@@ -161,7 +163,6 @@ public class MemberController{
 		if(request.getServerPort() != 80) {
 			serverUrl = serverUrl + ":" + request.getServerPort();
 		}
-		System.out.println(serverUrl);
 		String authUrl="";
 		try {
 			if(link.equals("naver")) {
@@ -355,11 +356,10 @@ public class MemberController{
 	@GetMapping("/mypage")
 	public ModelAndView mypageInfo(@ModelAttribute("_method")String method,Model model,
 			SearchCriteria cri) throws Exception{
-		logger.info("회원정보수정");
+		logger.info("회원정보페이지"+auth);
 		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		ModelAndView mv = new ModelAndView();
 		UserDetailsVO userDetails = (UserDetailsVO)principal;	
-		System.out.println("userDetails"+userDetails);		
 		try {
 			if(auth==0&&method.equals("")){ //마이페이지접속
 				auth=0;
@@ -422,8 +422,7 @@ public class MemberController{
 		}
 		return mv;
 	}
-	
-	
+		
 	//내가 쓴 댓글 리스트
 	@PostMapping("/myReply")
 	public @ResponseBody ModelAndView myReplyList(Integer page,Model model,
@@ -438,13 +437,13 @@ public class MemberController{
 			Map<String,Object> map = new HashMap<String,Object>();
 			map.put("userId", userDetails.getUserId());	
 			map.put("cri", cri);	
-			model.addAttribute("reply",service.myReply(map));
+			mv.addObject("reply",service.myReply(map));
 	    
 			PageMaker pageMk=new PageMaker();
 			pageMk.setCri(cri);
 			pageMk.setTotalCount(service.myReplyCnt(userDetails.getUserId()));
 			cri.setPage(page);
-			model.addAttribute("pageMk", pageMk);
+			mv.addObject("pageMk", pageMk);
 
 			mv.setViewName("/member/mypagereply");
 		}catch(Exception e){
@@ -480,7 +479,7 @@ public class MemberController{
 		try {			
 			map.put("id",vo.getUserId());
 			if(vo.getUserNickName()!=null) {	//닉네임
-				map.put("nick",vo.getUserNickName());
+				map.put("nick",vo.getUserNickName());				
 			}else if(vo.getUserPw()!=null) {	//비밀번호
 				System.out.println(vo.getUserPw());
 				map.put("pw",vo.getUserPw());
@@ -496,7 +495,13 @@ public class MemberController{
 				}
 			}
 			modify=service.infoModify(map);	
-			System.out.println("modify : "+modify);
+			if(vo.getUserNickName()!=null) {
+				UserDetailsVO userDetails = (UserDetailsVO)memberDAO.getUserInfo(vo.getUserId());
+				userDetails.setUserPw(null);
+				Authentication auth = new UsernamePasswordAuthenticationToken(
+						userDetails, null, userDetails.getAuthorities());	  
+		        ((AbstractAuthenticationToken) auth).setDetails(userDetails);
+			}			
 	    }catch(Exception e) {
 	    	System.out.println(e.getMessage());
 	    }

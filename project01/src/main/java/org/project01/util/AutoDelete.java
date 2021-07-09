@@ -41,7 +41,7 @@ public class AutoDelete {
 				//현재시간 - 탈퇴시간
 				long sec=cal.getTimeInMillis()-levCal.getTimeInMillis();
 				int days=(int)sec/(24*60*60*1000);
-				if(days>=0) {
+				if(days>7) {
 					adminDAO.deleteMem(mem.getUserId());					
 				}
 			}catch(Exception e) {

@@ -10,7 +10,7 @@
 </head>
 <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.js" type="text/javascript"></script> -->
 <link href="/resources/css/main.css" rel="stylesheet" type="text/css" />
-
+<script src="/resources/js/mainhome.js" type="text/javascript"></script>
 <body>
 <div id="main_body">
 	<div id="main_container">
@@ -80,14 +80,14 @@
 			<div id="board_nav">
 				<div class="_divtit">커뮤니티 메뉴</div>
 				<div class="group_box _left" >
-					<c:forEach items="${brdNameList}" var="brdName" begin="0" end="8">				
+					<c:forEach items="${brdNameList}" var="brdName" begin="0" end="7">				
 						<div class="brd_name">
 							<a href="/cmu/brd/${brdName.BRD_MENU_LINK}?mid=${brdName.BRD_IDX}" class=" _underline">${brdName.BRD_NAME}</a>
 						</div>										
 					</c:forEach>
 				</div>
 				<div class="group_box" >
-					<c:forEach items="${brdNameList}" var="brdName" begin="9" end="18">				
+					<c:forEach items="${brdNameList}" var="brdName" begin="8" end="18">				
 						<div class="brd_name">
 							<a href="/cmu/brd/${brdName.BRD_MENU_LINK}?mid=${brdName.BRD_IDX}" class=" _underline">${brdName.BRD_NAME}</a>
 							</div>										
@@ -111,7 +111,6 @@
 		</div>
 	</div>
 </div>
-<script src="/resources/js/mainhome.js" type="text/javascript"></script>
 <script>
 var result='${joinMsg}';
 if(result=="success"){

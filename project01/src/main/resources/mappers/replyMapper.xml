@@ -52,8 +52,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	
 	<!-- 댓글수정 -->
 	<update id="updateReply" >
-		<![CDATA[ update reply_${nav} set reply_content=#{rpContent} ,
-		reply_update = sysdate  
+		<![CDATA[ update reply_${nav} set reply_content=#{rpContent} ,reply_update = sysdate  
 		where reply_idx=#{replyId} and post_idx=#{postId}]]>
 	</update>
 	
@@ -63,7 +62,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</delete>
 	
 	<!-- 게시글삭제시 댓글 전부 삭제 -->
-	<delete id="allDelete">
+<!-- 	<delete id="allDelete">
 		delete reply_${nav} where post_idx=#{postId}
-	</delete>
+	</delete> -->
 </mapper> 

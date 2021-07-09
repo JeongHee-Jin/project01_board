@@ -189,8 +189,7 @@ public class BrdController {
 //	}
 	//게시판 말머리출력
 	@RequestMapping(value="/catelist",method=RequestMethod.POST)
-	@ResponseBody
-	public List<Map<String,Object>> brdNav(
+	public @ResponseBody List<Map<String,Object>> brdNav(
 			@ModelAttribute("mid")String mid, Model model) throws Exception{
 		logger.info("게시판 말머리 출력");
 		List<Map<String,Object>> cateN=  new ArrayList<Map<String, Object>>();
@@ -200,21 +199,19 @@ public class BrdController {
 			System.out.println(e.getMessage());
 		}	
 		return cateN;
-	}
-	
-	
+	}	
 	
 	//글쓰기페이지출력(게시판메뉴, 카테고리메뉴 출력)
 	@RequestMapping(value="/register", method=RequestMethod.GET)
 	public void registerGET(@ModelAttribute("nav")String nav, @ModelAttribute("mid")String mid,
 			Model model,SearchCriteria cri) throws Exception{
-		logger.info("글쓰기페이지"+mid);
+		logger.info("글쓰기페이지");
 		try {
-			if(mid.equals("")) {
-				model.addAttribute("brd",service.brdNameListNon());    //게시판메뉴
+			if(mid.equals("")) { //전체,인기글에서 글쓰기시 커뮤니티의 게시판 리스트 전체를 출력합니다.
+				model.addAttribute("brd",service.cmuBrdNameList());
 			}else {
-				model.addAttribute("brd",service.brdNameListCla(mid));  //게시판리스트
-				model.addAttribute("cate",service.cateNameListMid(mid));//카테고리리스트
+				model.addAttribute("brd",service.brdNameListCla(mid));  //접속된 게시판리스트
+				model.addAttribute("cate",service.cateNameListMid(mid));//접속된 게시판의 카테고리리스트
 			}		
 		}catch(Exception e) {
 			System.out.println(e.getMessage());
@@ -258,7 +255,6 @@ public class BrdController {
 		map.put("nav",nav);
 		map.put("mid",mid);
 		map.put("postId",post);
-		System.out.println(map);
 		BrdVO vo=service.read(map,2);
 		try {
 			if(userDetails.getUserId().equals(vo.getMemId()) || userDetails.getRole().equals("ROLE_ADMIN")) {	
@@ -300,25 +296,21 @@ public class BrdController {
 	
 	//RedirectAttributes의 addFlashAttribute메서드에 key/value로 웹페이지에 값을 넘겨줄수 있지만 
 	//하나의 key값으로 넘겨주어야 하므로 여러개의 값을 페이지로 넘겨 줄 경우 list나 map 형태의 객체를 value로 담아서 넘겨주면 되겠습니다.
-	
-	
+		
 	//게시물삭제	
 	@RequestMapping(value="/remove", method=RequestMethod.POST)
 	@ResponseBody
-	public void remove(BrdVO vo) throws Exception{
+	public void remove(BrdVO vo,HttpServletRequest request) throws Exception{
 		logger.info("게시물 삭제 처리 ");
 		Map<String,Object> map=new HashMap<String,Object>();
-		Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();		
-		UserDetailsVO userDetails = (UserDetailsVO)principal;
-		awsS3=AwsS3.getInstance();
+		map.put("nav",vo.getNav());
+		map.put("postId",vo.getPostId());
 		try {
-			memberDAO.mypageInfo(userDetails.getUserId());
-			map.put("nav",vo.getNav());
-			map.put("postId",vo.getPostId());
 			List<BoardAttachVO> attachList = service.getAttachList(map);
 			if(attachList!=null && attachList.size()>0) {
 				attachList.forEach(attach->{
 					String fileName=attach.getFileId()+"_"+attach.getFileName();
+					awsS3=AwsS3.getInstance();
 					awsS3.delete(attach.getUploadPath(),fileName);
 				});
 			}		
@@ -389,7 +381,6 @@ public class BrdController {
 					.getAuthentication().getPrincipal();
 			vo.setMemId(principal.getUserId());
 			vo.setMemNickName(principal.getUserNickName());
-
 			model.addAttribute("nav",vo.getNav());
 			model.addAttribute("mid",vo.getBrdId());			
 			service.commentaire(vo);			

@@ -126,7 +126,7 @@ public class BrdServiceImpl implements BrdService {
 	}
 
 	@Override
-	public List<Map<String, String>> brdNameListNon() throws Exception {
-		return brdDAO.brdNameListNon();
+	public List<Map<String, String>> cmuBrdNameList() throws Exception {
+		return brdDAO.cmuBrdNameList();
 	}
 }
