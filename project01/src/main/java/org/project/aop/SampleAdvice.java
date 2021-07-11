@@ -22,7 +22,6 @@ public class SampleAdvice{
 
 	  }
 	  
-	  
 	  @Around("execution(* org.project01.service.MessageService*.*(..))")
 	  public Object timeLog(ProceedingJoinPoint pjp)throws Throwable{
 	    

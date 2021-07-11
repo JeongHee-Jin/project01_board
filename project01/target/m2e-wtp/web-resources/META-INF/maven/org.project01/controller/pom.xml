@@ -307,6 +307,12 @@
 		    <artifactId>commons-lang3</artifactId>
 		    <version>3.4</version>
 		</dependency>
+		<!-- Mobile Device -->
+		<!-- <dependency>
+			<groupId>org.springframework.mobile</groupId> 
+			<artifactId>spring-mobile-device</artifactId>
+			<version>1.1.5.RELEASE</version>
+		</dependency> -->
 	</dependencies>
 	<build>
 		<plugins>

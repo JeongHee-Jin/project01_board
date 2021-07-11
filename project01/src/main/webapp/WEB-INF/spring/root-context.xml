@@ -103,7 +103,7 @@
       <!-- <property name="port" value="587" /> -->
       <property name="port" value="465" />
       <property name="username" value="username" /> <!-- 구글아이디 -->
-      <property name="password" value="password"  /> <!-- 구글 2차 비밀번호 -->
+      <property name="password" value="password" /> <!-- 구글 2차 비밀번호 -->
    	  <property name="defaultEncoding" value="UTF-8" />
       <!-- email 요청시는 SMTP, 보안연결 SSL 설정-->
       <property name="javaMailProperties">

@@ -8,6 +8,9 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<!-- width=divie-width: 페이지너비를 기기 스크린 너비로 설정, inital-scale=1.0: 처음 페이지 로딩시 확대/ 축소 되지 않는 원래 크기 사용, 0~10 값을 가지고있음 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <!-- base url: 주소 특정값 자동 추가 -->
 <%--  <base href="" target="_blank"> --%>
  <!-- csp는  xss 공격을 막기 위해 만들어진 정책, 인라인 js,css 넣지 못하게 막음 -->

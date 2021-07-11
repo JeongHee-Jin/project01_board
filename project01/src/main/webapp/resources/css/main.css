@@ -212,7 +212,7 @@
 	margin-right: 10px;
 }
 #banner_ad_r{
-	position: sticky;
+	/* position: sticky; */
     top: 30px;
     width: 1px;
     height: 1px;
@@ -252,4 +252,14 @@
 	}
 }
 
+@media(max-width:445px){
+	#main_container{
+	min-height: auto;
+	}
+	#main_left{
+		display: none;
+	}
+	#main_right {
+    	top:0;
+	}
 }
