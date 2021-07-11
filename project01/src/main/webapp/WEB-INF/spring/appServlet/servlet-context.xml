@@ -12,7 +12,13 @@
 		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
-	
+		<!-- 스프링 모바일 -->
+<!-- 	<annotation-driven>
+		<argument-resolvers>
+			 <beans:bean class="org.springframework.mobile.device.DeviceWebArgumentResolver" />
+			 <beans:bean class="org.springframework.mobile.device.site.SitePreferenceWebArgumentResolver" />
+		</argument-resolvers>
+	</annotation-driven> -->
 	<!-- Enables the Spring MVC @Controller programming model -->
 	<annotation-driven />
 
@@ -26,6 +32,21 @@
 		<beans:property name="suffix" value=".jsp" />
 	</beans:bean>
 
+	<!-- 스프링 웹/ 모바일 구문해 mvc에서 jsp를 호출할 경로의 패턴 설정-->
+<!-- 	<beans:bean class="org.springframework.mobile.device.view.LiteDeviceDelegatingViewResolver">
+		  <beans:constructor-arg>
+		  pc경로
+			<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<beans:property name="prefix" value="/WEB-INF/views/" />
+				<beans:property name="suffix" value=".jsp" />
+			</beans:bean>
+		</beans:constructor-arg>
+		모바일/ 태블릿 구분, 호출 중간에 m이 붙음
+		<beans:property name="mobilePrefix" value="m." />
+	  	<beans:property name="tabletPrefix" value="m." />
+	  	<beans:property name="enableFallback" value="true"/>
+	</beans:bean> -->
+
 	<context:component-scan base-package="org.project01.controller" />
 	<!-- <security:global-method-security pre-post-annotations="enabled" secured-annotations="enabled" /> -->
 	<beans:bean id="mutipartResolver" class="org.springframework.web.multipart.support.StandardServletMultipartResolver">
@@ -35,7 +56,6 @@
 	<!-- NaverLoginBO,KakaoLoginBO Class에 대한 Bean설정 추가 -->
 	<beans:bean id="NaverAuthBO" class="org.project01.link.NaverAuthBO" />
 	<beans:bean id="KakaoAuthBO" class="org.project01.link.KakaoAuthBO" />
-	
 	
 	
 	<!-- jasypt  -->
