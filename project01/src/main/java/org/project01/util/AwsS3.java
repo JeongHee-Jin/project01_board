@@ -37,8 +37,8 @@ public class AwsS3 {
 	
 	//private final AmazonS3Client amazonS3Client;
 	private AmazonS3 s3Client;
-    private static String accessKey = "AKIAX4DJM5PNFJ5IETBF";
-    private static String secretKey = "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";
+    private static String accessKey = "";
+    private static String secretKey = "";
     private Regions clientRegion = Regions.AP_NORTHEAST_2;
     final private String bucket = "myboardbox";
    
