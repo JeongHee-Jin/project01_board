@@ -11,7 +11,7 @@
 > 
 > 'boardbell'은 '소통을 전하다'라는 의미로 모든 유저들이 자유롭게 글을 쓰고 취향을 찾아 그것을 즐길수 있는 공간을 만들어 삶에 소소한 재미를 제공하는 서비스를 지향하고 있습니다.
 
-> **프로젝트 구현 주소**:yellow_heart: https://boardbell.shop/  
+> **프로젝트 구현 주소**:yellow_heart: https://boardbell.shop/  //현재 계정 잠김-해결중..
 > **시연영상**:purple_heart: https://youtu.be/XVMs_Q4wtlc
 
 
